@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kangyonggan.tradingEngine.mapper.SymbolConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kangyonggan.tradingEngine.entity.SymbolConfig">
+        <id column="id" property="id" />
+        <result column="symbol" property="symbol" />
+        <result column="taker_fee_rate" property="takerFeeRate" />
+        <result column="maker_fee_rate" property="makerFeeRate" />
+        <result column="price_scale" property="priceScale" />
+        <result column="quantity_scale" property="quantityScale" />
+        <result column="sort" property="sort" />
+        <result column="enable" property="enable" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+</mapper>

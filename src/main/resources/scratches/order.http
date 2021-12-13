@@ -1,0 +1,6 @@
+POST {{app_host}}/v1/order
+Content-Type: application/json
+
+{
+  "uid": "12345678"
+}

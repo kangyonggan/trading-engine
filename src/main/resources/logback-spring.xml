@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <springProperty scop="context" name="LOG_ENV" source="spring.profiles.active"/>
+    <springProperty scop="context" name="LOG_NAME" source="spring.application.name"/>
+    <springProperty scop="context" name="LOG_PATH" source="log.path"/>
+    <springProperty scop="context" name="LOG_DEBUG" source="log.debug"/>
+    <springProperty scop="context" name="LOG_ERROR" source="log.error"/>
+    <property name="LOG_PATTERN" value="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%logger{36}.%t:%L]&lt;traceId-%mdc{TRACE_ID:-0}> - %msg%n"/>
+
+    <!-- Console log output -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <if condition='!property("LOG_ENV").contains("dev")'>
+        <then>
+            <!-- Log file all output -->
+            <appender name="all" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOG_PATH}/all-${LOG_NAME}.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                    <fileNamePattern>${LOG_PATH}/%d{yyyy-MM}/all-${LOG_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                    <maxFileSize>500MB</maxFileSize>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>${LOG_PATTERN}</pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                    <level>INFO</level>
+                </filter>
+            </appender>
+
+            <!-- Log file error output -->
+            <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOG_PATH}/error-${LOG_NAME}.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                    <fileNamePattern>${LOG_PATH}/%d{yyyy-MM}/error-${LOG_NAME}-%d{yyyy-MM-dd}.%i.log.gz
+                    </fileNamePattern>
+                    <maxFileSize>500MB</maxFileSize>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>${LOG_PATTERN}</pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                    <level>ERROR</level>
+                </filter>
+            </appender>
+        </then>
+    </if>
+
+    <logger name="org.springframework.data.redis.listener.RedisMessageListenerContainer" level="ERROR"/>
+    <if condition='!property("LOG_DEBUG").isEmpty()'>
+        <then>
+            <logger name="${LOG_DEBUG}" level="DEBUG"/>
+        </then>
+    </if>
+    <if condition='!property("LOG_ERROR").isEmpty()'>
+        <then>
+            <logger name="${LOG_ERROR}" level="ERROR"/>
+        </then>
+    </if>
+
+    <root level="info">
+        <if condition='property("LOG_ENV").contains("dev")'>
+            <then>
+                <appender-ref ref="console"/>
+            </then>
+            <else>
+                <appender-ref ref="all"/>
+                <appender-ref ref="error"/>
+            </else>
+        </if>
+    </root>
+</configuration>
