@@ -9,6 +9,7 @@ import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.mapper.OrderMapper;
 import com.kangyonggan.tradingEngine.service.IOrderService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -69,5 +70,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         QueryWrapper<Order> qw = new QueryWrapper<>();
         qw.eq("uid", uid).eq("client_order_no", clientOrderNo);
         return baseMapper.selectOne(qw);
+    }
+
+    @Override
+    public List<Order> getOrder(String uid, String clientOrderNo, String symbol) {
+        QueryWrapper<Order> qw = new QueryWrapper<>();
+        qw.eq("uid", uid);
+        if (StringUtils.isNotEmpty(clientOrderNo)) {
+            qw.eq("client_order_no", clientOrderNo);
+        }
+        if (StringUtils.isNotEmpty(symbol)) {
+            qw.eq("symbol", symbol);
+        }
+        return baseMapper.selectList(qw);
     }
 }

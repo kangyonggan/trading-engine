@@ -54,4 +54,14 @@ public interface IOrderService extends IService<Order> {
      */
     Order getOrder(String uid, String clientOrderNo);
 
+    /**
+     * 查询用户订单
+     *
+     * @param uid
+     * @param clientOrderNo
+     * @param symbol
+     * @return
+     */
+    List<Order> getOrder(String uid, String clientOrderNo, String symbol);
+
 }

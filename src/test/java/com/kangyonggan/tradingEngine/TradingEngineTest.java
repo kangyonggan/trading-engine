@@ -3,6 +3,7 @@ package com.kangyonggan.tradingEngine;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
 import com.kangyonggan.tradingEngine.constants.enums.Symbol;
+import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
 import com.kangyonggan.tradingEngine.engine.OrderBook;
@@ -83,10 +84,18 @@ public class TradingEngineTest extends AbstractTest {
 
     @Test
     public void cancelOrder() {
-        GetOrderReq req = new GetOrderReq();
+        CancelOrderReq req = new CancelOrderReq();
         req.setUid("13245678");
         req.setClientOrderNo("1639399904451");
-        tradingEngine.cancelOrder(req);
+        LOGGER.info("撤销订单返回：{}", tradingEngine.cancelOrder(req));
+    }
+
+    @Test
+    public void cancelOrderBySymbol() {
+        CancelOrderReq req = new CancelOrderReq();
+        req.setUid("13245678");
+        req.setSymbol(Symbol.ETHUSDT);
+        LOGGER.info("撤销订单返回：{}", tradingEngine.cancelOrder(req));
     }
 
     @Test

@@ -6,8 +6,10 @@ import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
+import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
+import com.kangyonggan.tradingEngine.dto.res.CancelOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.CreateOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.GetOrderRes;
 import com.kangyonggan.tradingEngine.entity.Order;
@@ -16,6 +18,7 @@ import com.kangyonggan.tradingEngine.service.IOrderService;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
 import com.kangyonggan.tradingEngine.service.ITradeService;
 import com.kangyonggan.tradingEngine.util.ValidUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,9 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author kyg
@@ -98,24 +99,29 @@ public class TradingEngine {
      * 撤销订单
      *
      * @param req
+     * @return
      */
     @Valid
-    public void cancelOrder(GetOrderReq req) {
-        Order order = orderService.getOrder(req.getUid(), req.getClientOrderNo());
-        if (order == null) {
-            throw new BizException(ErrorCode.ORDER_NOT_EXISTS);
+    public CancelOrderRes cancelOrder(CancelOrderReq req) {
+        CancelOrderRes res = new CancelOrderRes();
+        if (StringUtils.isEmpty(req.getClientOrderNo()) && req.getSymbol() == null) {
+            throw new BizException(ErrorCode.PARAMS_EMPTY, "clientOrderNo|symbol");
         }
-        if (Arrays.asList(OrderStatus.FILLED.name(), OrderStatus.FAILURE.name(), OrderStatus.CANCELED.name()).contains(order.getStatus())) {
-            throw new BizException(ErrorCode.ORDER_CANNOT_CANCEL);
-        }
-        if (OrderStatus.CANCELED.name().equals(order.getStatus())) {
-            throw new BizException(ErrorCode.ORDER_ALREADY_CANCEL);
-        }
-        order.setStatus(OrderStatus.CANCELED.name());
+        List<Order> orders = orderService.getOrder(req.getUid(), req.getClientOrderNo(), req.getSymbol().name());
+        List<String> clientOrderNos = new ArrayList<>();
+        for (Order order : orders) {
+            if (Arrays.asList(OrderStatus.CANCELED.name(), OrderStatus.FAILURE.name(), OrderStatus.FILLED.name()).contains(order.getStatus())) {
+                continue;
+            }
+            order.setStatus(OrderStatus.CANCELED.name());
 
-        synchronized (getLock(order.getSymbol())) {
-            orderBook.cancelOrder(order);
+            synchronized (getLock(order.getSymbol())) {
+                orderBook.cancelOrder(order);
+            }
+            clientOrderNos.add(order.getClientOrderNo());
         }
+        res.setClientOrderNos(clientOrderNos);
+        return res;
     }
 
     /**
@@ -260,5 +266,4 @@ public class TradingEngine {
             throw new BizException(ErrorCode.ORDER_REPETITION);
         }
     }
-
 }

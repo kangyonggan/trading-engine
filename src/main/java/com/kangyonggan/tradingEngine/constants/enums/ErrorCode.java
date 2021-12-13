@@ -38,16 +38,6 @@ public enum ErrorCode {
      */
     ORDER_NOT_EXISTS("1001"),
 
-    /**
-     * 订单不可撤销
-     */
-    ORDER_CANNOT_CANCEL("1002"),
-
-    /**
-     * 订单已撤销
-     */
-    ORDER_ALREADY_CANCEL("1003"),
-
     ;
     /**
      * 响应码
