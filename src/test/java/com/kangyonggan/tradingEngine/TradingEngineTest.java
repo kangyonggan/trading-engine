@@ -6,7 +6,7 @@ import com.kangyonggan.tradingEngine.constants.enums.Symbol;
 import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
-import com.kangyonggan.tradingEngine.engine.OrderBook;
+import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
 import com.kangyonggan.tradingEngine.engine.TradingEngine;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,6 @@ public class TradingEngineTest extends AbstractTest {
 
     @Autowired
     private TradingEngine tradingEngine;
-
-    @Autowired
-    private OrderBook orderBook;
 
     @Test
     public void createOrderLimitBuy() {
@@ -99,9 +96,17 @@ public class TradingEngineTest extends AbstractTest {
     }
 
     @Test
+    public void openOrders() {
+        OpenOrderReq req = new OpenOrderReq();
+        req.setUid("13245678");
+        req.setSymbol(Symbol.ETHUSDT);
+        LOGGER.info("当前挂单返回：{}", tradingEngine.openOrders(req));
+    }
+
+    @Test
     public void getBuySellOrders() {
-        LOGGER.info("买盘：{}", orderBook.getBuyOrders(Symbol.ETHUSDT.name()));
-        LOGGER.info("卖盘：{}", orderBook.getSellOrders(Symbol.ETHUSDT.name()));
+        LOGGER.info("买盘：{}", tradingEngine.getBuyOrders(Symbol.ETHUSDT.name()));
+        LOGGER.info("卖盘：{}", tradingEngine.getSellOrders(Symbol.ETHUSDT.name()));
     }
 
 }

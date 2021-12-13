@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @author kyg
  */
 @Data
-public class GetOrderRes implements Serializable {
+public class OrderRes implements Serializable {
     private Long orderId;
     private String uid;
     private String clientOrderNo;

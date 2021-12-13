@@ -9,9 +9,10 @@ import com.kangyonggan.tradingEngine.constants.enums.OrderType;
 import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
+import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
 import com.kangyonggan.tradingEngine.dto.res.CancelOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.CreateOrderRes;
-import com.kangyonggan.tradingEngine.dto.res.GetOrderRes;
+import com.kangyonggan.tradingEngine.dto.res.OrderRes;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.service.IOrderService;
@@ -84,12 +85,12 @@ public class TradingEngine {
      * @return
      */
     @Valid
-    public GetOrderRes getOrder(GetOrderReq req) {
+    public OrderRes getOrder(GetOrderReq req) {
         Order order = orderService.getOrder(req.getUid(), req.getClientOrderNo());
         if (order == null) {
             throw new BizException(ErrorCode.ORDER_NOT_EXISTS);
         }
-        GetOrderRes res = new GetOrderRes();
+        OrderRes res = new OrderRes();
         BeanUtils.copyProperties(order, res);
         res.setOrderId(order.getId());
         return res;
@@ -122,6 +123,40 @@ public class TradingEngine {
         }
         res.setClientOrderNos(clientOrderNos);
         return res;
+    }
+
+    /**
+     * 查询当前挂单
+     *
+     * @param req
+     * @return
+     */
+    @Valid
+    public List<OrderRes> openOrders(OpenOrderReq req) {
+        List<Order> orders = orderService.getOpenOrders(req);
+        return toOrderResList(orders);
+    }
+
+    /**
+     * 查询买盘
+     *
+     * @param symbol
+     * @return
+     */
+    public List<OrderRes> getBuyOrders(String symbol) {
+        List<Order> orders = orderBook.getBuyOrders(symbol);
+        return toOrderResList(orders);
+    }
+
+    /**
+     * 查询卖盘
+     *
+     * @param symbol
+     * @return
+     */
+    public List<OrderRes> getSellOrders(String symbol) {
+        List<Order> orders = orderBook.getSellOrders(symbol);
+        return toOrderResList(orders);
     }
 
     /**
@@ -265,5 +300,22 @@ public class TradingEngine {
         if (orderService.getOrder(req.getUid(), req.getClientOrderNo()) != null) {
             throw new BizException(ErrorCode.ORDER_REPETITION);
         }
+    }
+
+    /**
+     * Order 转 OrderRes
+     *
+     * @param orders
+     * @return
+     */
+    private List<OrderRes> toOrderResList(List<Order> orders) {
+        List<OrderRes> resOrders = new ArrayList<>(orders.size());
+        for (Order order : orders) {
+            OrderRes res = new OrderRes();
+            BeanUtils.copyProperties(order, res);
+            res.setOrderId(order.getId());
+            resOrders.add(res);
+        }
+        return resOrders;
     }
 }

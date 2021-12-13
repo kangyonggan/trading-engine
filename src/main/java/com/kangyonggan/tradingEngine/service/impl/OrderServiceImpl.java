@@ -6,6 +6,7 @@ import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
+import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.mapper.OrderMapper;
 import com.kangyonggan.tradingEngine.service.IOrderService;
@@ -82,6 +83,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (StringUtils.isNotEmpty(symbol)) {
             qw.eq("symbol", symbol);
         }
+        return baseMapper.selectList(qw);
+    }
+
+    @Override
+    public List<Order> getOpenOrders(OpenOrderReq req) {
+        QueryWrapper<Order> qw = new QueryWrapper<>();
+        qw.eq("uid", req.getUid());
+        qw.eq("type", OrderType.LIMIT.name());
+        qw.eq("symbol", req.getSymbol().name());
+        qw.in("status", Arrays.asList(OrderStatus.NEW.name(), OrderStatus.PARTIALLY_FILLED.name()));
         return baseMapper.selectList(qw);
     }
 }
