@@ -1,6 +1,8 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kangyonggan.tradingEngine.constants.enums.Enable;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.mapper.SymbolConfigMapper;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
@@ -26,7 +28,9 @@ public class SymbolConfigServiceImpl extends ServiceImpl<SymbolConfigMapper, Sym
 
     @PostConstruct
     public void init() {
-        List<SymbolConfig> symbolConfigs = baseMapper.selectList(null);
+        QueryWrapper<SymbolConfig> qw = new QueryWrapper<>();
+        qw.eq("enable", Enable.YES.getValue());
+        List<SymbolConfig> symbolConfigs = baseMapper.selectList(qw);
         for (SymbolConfig symbolConfig : symbolConfigs) {
             symbolConfigMap.put(symbolConfig.getSymbol(), symbolConfig);
         }

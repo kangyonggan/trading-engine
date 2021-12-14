@@ -19,7 +19,7 @@ public class CodeGenerator {
     /**
      * 表
      */
-    private static final List<String> TABLES = Arrays.asList("order", "trade", "symbol_config");
+    private static final List<String> TABLES = Arrays.asList("user", "user_account", "user_account_log");
 
     public static void main(String[] args) {
         // 代码生成器

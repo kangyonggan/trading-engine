@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.kangyonggan.tradingEngine.components.LocalDateTimeDeserializer;
 import com.kangyonggan.tradingEngine.components.LocalDateTimeSerializer;
+import com.kangyonggan.tradingEngine.interceptor.AuthorizationInterceptor;
 import com.kangyonggan.tradingEngine.interceptor.LogInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +26,13 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Autowired
     private LogInterceptor logInterceptor;
 
+    @Autowired
+    private AuthorizationInterceptor authorizationInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(logInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(authorizationInterceptor).addPathPatterns("/**");
     }
 
     @Override

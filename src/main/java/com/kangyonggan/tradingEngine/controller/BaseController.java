@@ -2,17 +2,29 @@ package com.kangyonggan.tradingEngine.controller;
 
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.components.MessageHandler;
+import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.dto.res.Result;
+import com.kangyonggan.tradingEngine.entity.User;
+import com.kangyonggan.tradingEngine.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author kyg
  */
 @Slf4j
 public class BaseController {
+
+    @Autowired
+    protected HttpServletRequest request;
+
+    @Autowired
+    protected IUserService userService;
 
     @Autowired
     private MessageHandler messageHandler;
@@ -41,5 +53,27 @@ public class BaseController {
         // i18n
         result.setMsg(messageHandler.getMsg(code, args));
         return result;
+    }
+
+    /**
+     * 获取当前用户
+     *
+     * @return
+     */
+    protected User currentUser() {
+        String token = request.getHeader(AppConstants.HEADER_TOKEN);
+        if (StringUtils.isEmpty(token)) {
+            return null;
+        }
+        return userService.getUserInfoByToken(token);
+    }
+
+    /**
+     * 获取当前用户的uid
+     *
+     * @return
+     */
+    protected String currentUid() {
+        return currentUser().getUid();
     }
 }

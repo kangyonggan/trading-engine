@@ -10,15 +10,15 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 交易对配置表
+ * 用户账户日志表
  * </p>
  *
  * @author mbg
- * @since 2021-12-13
+ * @since 2021-12-14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SymbolConfig implements Serializable {
+public class UserAccountLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,34 +29,39 @@ public class SymbolConfig implements Serializable {
     private Long id;
 
     /**
+     * UID
+     */
+    private String uid;
+
+    /**
+     * 订单号
+     */
+    private String orderNo;
+
+    /**
+     * 账户类型
+     */
+    private String accountType;
+
+    /**
      * 交易对
      */
     private String symbol;
 
     /**
-     * Taker手续费率
+     * 类型
      */
-    private BigDecimal takerFeeRate;
+    private String type;
 
     /**
-     * Maker手续费率
+     * 金额
      */
-    private BigDecimal makerFeeRate;
+    private BigDecimal amount;
 
     /**
-     * 价格精度
+     * 状态
      */
-    private Integer priceScale;
-
-    /**
-     * 数量精度
-     */
-    private Integer quantityScale;
-
-    /**
-     * 排序
-     */
-    private Integer sort;
+    private String status;
 
     /**
      * 是否可用

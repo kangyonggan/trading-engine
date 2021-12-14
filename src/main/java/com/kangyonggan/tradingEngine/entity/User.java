@@ -1,24 +1,26 @@
 package com.kangyonggan.tradingEngine.entity;
 
-import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 交易对配置表
+ * 用户表
  * </p>
  *
  * @author mbg
- * @since 2021-12-13
+ * @since 2021-12-14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SymbolConfig implements Serializable {
+public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,34 +31,26 @@ public class SymbolConfig implements Serializable {
     private Long id;
 
     /**
-     * 交易对
+     * UID
      */
-    private String symbol;
+    private String uid;
 
     /**
-     * Taker手续费率
+     * 邮箱
      */
-    private BigDecimal takerFeeRate;
+    private String email;
 
     /**
-     * Maker手续费率
+     * 密码
      */
-    private BigDecimal makerFeeRate;
+    @JsonIgnore
+    private String password;
 
     /**
-     * 价格精度
+     * 密码盐
      */
-    private Integer priceScale;
-
-    /**
-     * 数量精度
-     */
-    private Integer quantityScale;
-
-    /**
-     * 排序
-     */
-    private Integer sort;
+    @JsonIgnore
+    private String salt;
 
     /**
      * 是否可用
@@ -73,5 +67,10 @@ public class SymbolConfig implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * 登录令牌
+     */
+    @TableField(exist = false)
+    private String token;
 
 }

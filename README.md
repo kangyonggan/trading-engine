@@ -23,6 +23,7 @@ java -jar target/*.jar
 ## 配置
 - MySQL用户名和密码。
 - Redis用户名和密码。
+- Email用户名和密码。
 - 生产环境日志文件路径。
 
 

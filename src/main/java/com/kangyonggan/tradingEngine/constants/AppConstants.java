@@ -5,5 +5,23 @@ package com.kangyonggan.tradingEngine.constants;
  */
 public interface AppConstants {
 
+    /**
+     * token在header中的名字
+     */
+    String HEADER_TOKEN = "Authorization";
+
+    /**
+     * 密码的HASH次数
+     */
+    int SALT_SIZE = 8;
+    int HASH_INTERATIONS = 2;
+
+    /**
+     * token有效期（分钟）
+     */
+    int TOKEN_EXPIRE_TIME = 7 * 24 * 60;
+
+    String ENV_DEV = "dev";
+
     String APPLICATION_JSON = "application/json";
 }

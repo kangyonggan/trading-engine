@@ -11,3 +11,10 @@ spring:
 
 log:
   path: '/srv/logs/@project.artifactId@'
+
+email:
+  host: smtp.exmail.qq.com
+  port: 465
+  username: noreply@kangyonggan.com
+  password: xxx
+  expires-in: 10

@@ -10,4 +10,9 @@ public interface RedisKeys {
      */
     String INCR = "INCR";
 
+    /**
+     * 用户token
+     */
+    String TOKEN = "TOKENS:";
+
 }

@@ -29,6 +29,31 @@ public enum ErrorCode {
     PARAMS_ERROR("0004"),
 
     /**
+     * 验证码错误！
+     */
+    USER_VERIFY_CODE_ERROR("2000"),
+    /**
+     * 邮箱已被注册！
+     */
+    USER_EMAIL_HAS_REGISTER("2001"),
+    /**
+     * 邮箱不存在！
+     */
+    USER_EMAIL_NOT_EXISTS("2002"),
+    /**
+     * 密码错误！
+     */
+    USER_PASSWORD_ERROR("2003"),
+    /**
+     * 验证码已失效！
+     */
+    USER_VERIFY_CODE_INVALID("2004"),
+    /**
+     * 认证失败！
+     */
+    USER_AUTHORIZATION_FAILURE("2005"),
+
+    /**
      * 订单重复
      */
     ORDER_REPETITION("1000"),
