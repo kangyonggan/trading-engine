@@ -1,6 +1,7 @@
 package com.kangyonggan.tradingEngine.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kangyonggan.tradingEngine.dto.req.AllOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
 import com.kangyonggan.tradingEngine.dto.res.OrderRes;
@@ -73,4 +74,12 @@ public interface IOrderService extends IService<Order> {
      * @return
      */
     List<Order> getOpenOrders(OpenOrderReq req);
+
+    /**
+     * 查询全部订单
+     *
+     * @param req
+     * @return
+     */
+    List<Order> getAllOrders(AllOrderReq req);
 }

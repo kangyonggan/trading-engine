@@ -6,10 +6,7 @@ import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
-import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
+import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.CancelOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.CreateOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.OrderRes;
@@ -134,6 +131,18 @@ public class TradingEngine {
     @Valid
     public List<OrderRes> openOrders(OpenOrderReq req) {
         List<Order> orders = orderService.getOpenOrders(req);
+        return toOrderResList(orders);
+    }
+
+    /**
+     * 查询全部订单
+     *
+     * @param req
+     * @return
+     */
+    @Valid
+    public List<OrderRes> allOrders(AllOrderReq req) {
+        List<Order> orders = orderService.getAllOrders(req);
         return toOrderResList(orders);
     }
 

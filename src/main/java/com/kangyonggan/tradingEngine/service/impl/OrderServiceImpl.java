@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
+import com.kangyonggan.tradingEngine.dto.req.AllOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
 import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
 import com.kangyonggan.tradingEngine.entity.Order;
@@ -83,6 +84,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (StringUtils.isNotEmpty(symbol)) {
             qw.eq("symbol", symbol);
         }
+        qw.orderByDesc("id");
         return baseMapper.selectList(qw);
     }
 
@@ -93,6 +95,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         qw.eq("type", OrderType.LIMIT.name());
         qw.eq("symbol", req.getSymbol().name());
         qw.in("status", Arrays.asList(OrderStatus.NEW.name(), OrderStatus.PARTIALLY_FILLED.name()));
+        qw.orderByDesc("id");
+        return baseMapper.selectList(qw);
+    }
+
+    @Override
+    public List<Order> getAllOrders(AllOrderReq req) {
+        QueryWrapper<Order> qw = new QueryWrapper<>();
+        qw.eq("uid", req.getUid());
+        qw.eq("symbol", req.getSymbol().name());
+        qw.gt("id", req.getOrderId());
+
+        qw.orderByDesc("id");
+        qw.last("LIMIT " + req.getLimit());
         return baseMapper.selectList(qw);
     }
 }

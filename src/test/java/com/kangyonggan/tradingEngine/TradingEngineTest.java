@@ -3,10 +3,7 @@ package com.kangyonggan.tradingEngine;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
 import com.kangyonggan.tradingEngine.constants.enums.Symbol;
-import com.kangyonggan.tradingEngine.dto.req.CancelOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.OpenOrderReq;
+import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.engine.TradingEngine;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +98,15 @@ public class TradingEngineTest extends AbstractTest {
         req.setUid("13245678");
         req.setSymbol(Symbol.ETHUSDT);
         LOGGER.info("当前挂单返回：{}", tradingEngine.openOrders(req));
+    }
+
+    @Test
+    public void allOrders() {
+        AllOrderReq req = new AllOrderReq();
+        req.setUid("13245678");
+        req.setSymbol(Symbol.ETHUSDT);
+        req.setOrderId(0L);
+        LOGGER.info("全部订单返回：{}", tradingEngine.allOrders(req));
     }
 
     @Test
