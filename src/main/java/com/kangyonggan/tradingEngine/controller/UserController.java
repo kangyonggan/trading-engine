@@ -5,7 +5,6 @@ import com.kangyonggan.tradingEngine.annotation.ApiVersion;
 import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
-import com.kangyonggan.tradingEngine.dto.req.UserRegisterReq;
 import com.kangyonggan.tradingEngine.dto.res.Result;
 import com.kangyonggan.tradingEngine.entity.User;
 import org.springframework.web.bind.annotation.*;
@@ -28,19 +27,6 @@ public class UserController extends BaseController {
     @AnonymousAccess
     public Result<User> login(@RequestBody UserLoginReq req) {
         return Result.getSuccess(userService.login(req));
-    }
-
-    /**
-     * 注册
-     *
-     * @param req
-     * @return
-     */
-    @PostMapping("register")
-    @AnonymousAccess
-    public Result<Void> register(@RequestBody UserRegisterReq req) {
-        userService.register(req);
-        return Result.getSuccess();
     }
 
     /**

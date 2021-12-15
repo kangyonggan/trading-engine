@@ -1,11 +1,10 @@
 package com.kangyonggan.tradingEngine.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
-import com.kangyonggan.tradingEngine.dto.req.UserRegisterReq;
 import com.kangyonggan.tradingEngine.entity.User;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
@@ -24,13 +23,6 @@ public interface IUserService extends IService<User> {
      * @return
      */
     User login(UserLoginReq req);
-
-    /**
-     * 注册
-     *
-     * @param req
-     */
-    void register(UserRegisterReq req);
 
     /**
      * 根据token获取用户信息

@@ -1,6 +1,7 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.annotation.Valid;
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.components.DistributedLock;
@@ -12,12 +13,14 @@ import com.kangyonggan.tradingEngine.constants.enums.EmailCheckStatus;
 import com.kangyonggan.tradingEngine.constants.enums.EmailType;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.LoginType;
-import com.kangyonggan.tradingEngine.dto.req.*;
+import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
+import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
+import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
+import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
 import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.mapper.UserMapper;
 import com.kangyonggan.tradingEngine.service.IEmailService;
 import com.kangyonggan.tradingEngine.service.IUserService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.util.Digests;
 import com.kangyonggan.tradingEngine.util.Encodes;
 import com.kangyonggan.tradingEngine.util.NumberUtil;
@@ -26,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -52,17 +56,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     @Valid
+    @Transactional(rollbackFor = Exception.class)
     public User login(UserLoginReq req) {
         User user = getUserByEmail(req.getEmail());
-        if (user == null) {
-            throw new BizException(ErrorCode.USER_EMAIL_NOT_EXISTS);
-        }
         if (LoginType.BY_CODE.equals(req.getLoginType())) {
-            // 校验邮箱验证码
+            // dev环境不校验验证码
             if (!AppConstants.ENV_DEV.equals(env)) {
                 checkVerifyCode(req.getEmail(), EmailType.LOGIN, req.getVerifyCode());
             }
+            // 使用验证码登录，用户不存在注册
+            if (user == null) {
+                // 校验邮箱验证码
+                checkVerifyCode(req.getEmail(), EmailType.REGISTER, req.getVerifyCode());
+
+                // 保存用户相关信息
+                user = saveUserInfo(req);
+            }
         } else if (LoginType.BY_PWD.equals(req.getLoginType())) {
+            // 使用密码登录，用户不存在则报错
+            if (user == null) {
+                throw new BizException(ErrorCode.USER_EMAIL_NOT_EXISTS);
+            }
             // 验证密码
             byte[] salt = Encodes.decodeHex(user.getSalt());
             byte[] hashPassword = Digests.sha1(req.getPassword().getBytes(), salt, AppConstants.HASH_INTERATIONS);
@@ -81,16 +95,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         redisManager.set(RedisKeys.TOKEN + user.getToken(), user, AppConstants.TOKEN_EXPIRE_TIME);
 
         return user;
-    }
-
-    @Override
-    @Valid
-    public void register(UserRegisterReq req) {
-        // 校验邮箱验证码
-        checkVerifyCode(req.getEmail(), EmailType.REGISTER, req.getVerifyCode());
-
-        // 保存用户相关信息
-        saveUserInfo(req);
     }
 
     @Override
@@ -147,14 +151,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      * 保存用户信息
      *
      * @param req
+     * @return
      */
-    private void saveUserInfo(UserRegisterReq req) {
+    private User saveUserInfo(UserLoginReq req) {
         // user
         User user = new User();
         // 在锁中获取uid，防止并发获取重复uid，从而导致其中一个注册失败
         ((DistributedLock) () -> user.setUid(getUid())).getLock(LockId.GET_UID);
         user.setEmail(req.getEmail());
         baseMapper.insert(user);
+        return user;
     }
 
     /**

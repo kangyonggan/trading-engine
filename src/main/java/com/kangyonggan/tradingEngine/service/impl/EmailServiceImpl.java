@@ -1,10 +1,13 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
+import com.kangyonggan.tradingEngine.annotation.Valid;
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.components.EmailProperties;
 import com.kangyonggan.tradingEngine.components.MessageHandler;
 import com.kangyonggan.tradingEngine.components.RedisManager;
+import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.EmailCheckStatus;
+import com.kangyonggan.tradingEngine.constants.enums.EmailType;
 import com.kangyonggan.tradingEngine.dto.EmailDto;
 import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
 import com.kangyonggan.tradingEngine.dto.req.SendEmailReq;
@@ -12,6 +15,7 @@ import com.kangyonggan.tradingEngine.service.IEmailService;
 import com.kangyonggan.tradingEngine.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -55,8 +59,17 @@ public class EmailServiceImpl implements IEmailService {
     @Autowired
     private RedisManager redisManager;
 
+    @Value("${spring.profiles.active}")
+    private String env;
+
     @Override
+    @Valid
     public void sendEmail(SendEmailReq req) {
+        // dev环境不发送验证码
+        if (AppConstants.ENV_DEV.equals(env)) {
+            return;
+        }
+
         // 多语言
         Locale locale = messageHandler.getLocale();
         // 通用数据
@@ -84,6 +97,7 @@ public class EmailServiceImpl implements IEmailService {
     }
 
     @Override
+    @Valid
     public EmailCheckStatus checkEmailCode(CheckEmailCodeReq req) {
         EmailCheckStatus status;
         EmailDto emailDto = redisManager.get("EMAIL:" + req.getType().name() + ":" + req.getEmail());
