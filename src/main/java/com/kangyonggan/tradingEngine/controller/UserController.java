@@ -2,12 +2,18 @@ package com.kangyonggan.tradingEngine.controller;
 
 import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
+import com.kangyonggan.tradingEngine.dto.req.PermissionReq;
 import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
+import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.dto.res.Result;
 import com.kangyonggan.tradingEngine.entity.User;
+import com.kangyonggan.tradingEngine.service.IPermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author kyg
@@ -16,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("user")
 @ApiVersion(1)
 public class UserController extends BaseController {
+
+    @Autowired
+    private IPermissionService permissionService;
 
     /**
      * 登录
@@ -59,6 +68,54 @@ public class UserController extends BaseController {
     public Result<Void> setPassword(@RequestBody SetPwdReq req) {
         req.setUid(currentUid());
         userService.setPassword(req);
+        return Result.getSuccess();
+    }
+
+    /**
+     * 查询权限列表
+     *
+     * @return
+     */
+    @GetMapping("permission")
+    public Result<List<PermissionRes>> permission() {
+        return Result.getSuccess(permissionService.getPermissionList(currentUid()));
+    }
+
+    /**
+     * 添加权限
+     *
+     * @param req
+     * @return
+     */
+    @PostMapping("permission")
+    public Result<Void> savePermission(@RequestBody PermissionReq req) {
+        req.setUid(currentUid());
+        permissionService.savePermission(req);
+        return Result.getSuccess();
+    }
+
+    /**
+     * 修改权限
+     *
+     * @param req
+     * @return
+     */
+    @PutMapping("permission")
+    public Result<Void> updatePermission(@RequestBody PermissionReq req) {
+        req.setUid(currentUid());
+        permissionService.updatePermission(req);
+        return Result.getSuccess();
+    }
+
+    /**
+     * 删除权限
+     *
+     * @return
+     */
+    @DeleteMapping("permission")
+    public Result<Void> deletePermission(@RequestBody PermissionReq req) {
+        req.setUid(currentUid());
+        permissionService.deletePermission(req);
         return Result.getSuccess();
     }
 
