@@ -1,6 +1,5 @@
 package com.kangyonggan.tradingEngine.dto.req;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kangyonggan.tradingEngine.annotation.Valid;
 import com.kangyonggan.tradingEngine.constants.enums.LoginType;
 import lombok.Data;
@@ -34,7 +33,6 @@ public class UserLoginReq implements Serializable {
     /**
      * 登录密码
      */
-    @JsonIgnore
     @Valid(minLength = 5)
     private String password;
 
