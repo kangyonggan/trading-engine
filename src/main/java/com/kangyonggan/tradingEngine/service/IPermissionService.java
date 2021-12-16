@@ -56,4 +56,12 @@ public interface IPermissionService extends IService<Permission> {
      */
     void deletePermission(PermissionReq req);
 
+    /**
+     * 获取ApiKey对应的权限
+     *
+     * @param apiKey
+     * @return
+     */
+    Permission getPermissionByApiKey(String apiKey);
+
 }

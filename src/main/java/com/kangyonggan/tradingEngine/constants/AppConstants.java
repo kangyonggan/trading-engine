@@ -11,6 +11,11 @@ public interface AppConstants {
     String HEADER_TOKEN = "Authorization";
 
     /**
+     * Apikey在header中的名字
+     */
+    String HEADER_APIKEY = "APIKEY";
+
+    /**
      * 密码的HASH次数
      */
     int SALT_SIZE = 8;

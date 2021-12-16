@@ -1,11 +1,16 @@
 package com.kangyonggan.tradingEngine.interceptor;
 
 import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
+import com.kangyonggan.tradingEngine.annotation.ApiAccess;
+import com.kangyonggan.tradingEngine.components.ApiSignature;
 import com.kangyonggan.tradingEngine.components.MessageHandler;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
+import com.kangyonggan.tradingEngine.dto.RequestParams;
 import com.kangyonggan.tradingEngine.dto.res.Result;
+import com.kangyonggan.tradingEngine.entity.Permission;
 import com.kangyonggan.tradingEngine.entity.User;
+import com.kangyonggan.tradingEngine.service.IPermissionService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import com.kangyonggan.tradingEngine.util.Jackson2Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author kyg
@@ -32,10 +38,21 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     @Autowired
     private MessageHandler messageHandler;
 
+    @Autowired
+    private IPermissionService permissionService;
+
+    @Autowired
+    private ApiSignature apiSignature;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
+
+            // Api访问权限注解
+            if (!validApi(request, response, handlerMethod)) {
+                return false;
+            }
 
             // 校验登录注解
             if (!validLogin(request, response, handlerMethod)) {
@@ -44,6 +61,28 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
         }
 
+        return true;
+    }
+
+    /**
+     * Api访问权限注解
+     *
+     * @param request
+     * @param response
+     * @param handlerMethod
+     * @return
+     */
+    private boolean validApi(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
+        ApiAccess apiAccess = handlerMethod.getMethodAnnotation(ApiAccess.class);
+        if (apiAccess != null) {
+            String apiKey = request.getHeader(AppConstants.HEADER_APIKEY);
+            Permission permission = permissionService.getPermissionByApiKey(apiKey);
+            if (permission == null) {
+                return false;
+            }
+            // 验签
+            return apiSignature.verify(getParams(request), permission.getSecretKey());
+        }
         return true;
     }
 
@@ -58,8 +97,9 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
      * @throws IOException
      */
     private boolean validLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
+        ApiAccess apiAccess = handlerMethod.getMethodAnnotation(ApiAccess.class);
         AnonymousAccess anonymousAccess = handlerMethod.getMethodAnnotation(AnonymousAccess.class);
-        if (anonymousAccess == null) {
+        if (apiAccess == null && anonymousAccess == null) {
             // 判断是否登录
             if (!isLogin(request, response)) {
                 return false;
@@ -103,5 +143,20 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             writer.write(Jackson2Util.toJSONString(r));
             writer.flush();
         }
+    }
+
+    /**
+     * 获取请求参数
+     *
+     * @param request
+     * @return
+     */
+    private RequestParams<String, Object> getParams(HttpServletRequest request) {
+        Map<String, String[]> params = request.getParameterMap();
+        RequestParams<String, Object> resultMap = new RequestParams<>();
+        for (String key : params.keySet()) {
+            resultMap.put(key, params.get(key));
+        }
+        return resultMap;
     }
 }

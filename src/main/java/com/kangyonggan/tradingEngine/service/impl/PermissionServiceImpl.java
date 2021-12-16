@@ -122,6 +122,13 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         baseMapper.updateById(permission);
     }
 
+    @Override
+    public Permission getPermissionByApiKey(String apiKey) {
+        QueryWrapper<Permission> qw = new QueryWrapper<>();
+        qw.eq("api_key", apiKey);
+        return baseMapper.selectOne(qw);
+    }
+
     /**
      * 生成ApiKey
      *

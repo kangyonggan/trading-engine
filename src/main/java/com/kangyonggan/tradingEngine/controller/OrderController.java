@@ -1,5 +1,6 @@
 package com.kangyonggan.tradingEngine.controller;
 
+import com.kangyonggan.tradingEngine.annotation.ApiAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
 import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.CancelOrderRes;
@@ -30,6 +31,7 @@ public class OrderController extends BaseController {
      * @return
      */
     @PostMapping
+    @ApiAccess
     public Result<CreateOrderRes> createOrder(@RequestBody CreateOrderReq req) {
         req.setUid(currentUid());
         return Result.getSuccess(tradingEngine.createOrder(req));
@@ -42,6 +44,7 @@ public class OrderController extends BaseController {
      * @return
      */
     @DeleteMapping
+    @ApiAccess
     public Result<CancelOrderRes> cancelOrder(@RequestBody CancelOrderReq req) {
         req.setUid(currentUid());
         return Result.getSuccess(tradingEngine.cancelOrder(req));
@@ -54,6 +57,7 @@ public class OrderController extends BaseController {
      * @return
      */
     @GetMapping
+    @ApiAccess
     public Result<OrderRes> getOrder(GetOrderReq req) {
         req.setUid(currentUid());
         return Result.getSuccess(tradingEngine.getOrder(req));
@@ -66,6 +70,7 @@ public class OrderController extends BaseController {
      * @return
      */
     @GetMapping("openOrders")
+    @ApiAccess
     public Result<List<OrderRes>> openOrders(OpenOrderReq req) {
         req.setUid(currentUid());
         return Result.getSuccess(tradingEngine.openOrders(req));
@@ -78,6 +83,7 @@ public class OrderController extends BaseController {
      * @return
      */
     @GetMapping("allOrders")
+    @ApiAccess
     public Result<List<OrderRes>> allOrders(AllOrderReq req) {
         req.setUid(currentUid());
         return Result.getSuccess(tradingEngine.allOrders(req));
