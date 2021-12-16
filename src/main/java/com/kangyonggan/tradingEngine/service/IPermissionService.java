@@ -30,7 +30,7 @@ public interface IPermissionService extends IService<Permission> {
      *
      * @param req
      */
-    void savePermission(PermissionReq req);
+    PermissionRes savePermission(PermissionReq req);
 
     /**
      * 修改权限

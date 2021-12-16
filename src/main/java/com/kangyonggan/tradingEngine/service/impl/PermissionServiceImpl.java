@@ -46,13 +46,17 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public void savePermission(PermissionReq req) {
+    public PermissionRes savePermission(PermissionReq req) {
         Permission permission = new Permission();
         permission.setUid(req.getUid());
         permission.setRemark(req.getRemark());
         permission.setApiKey(generateApiKey());
         permission.setSecretKey(generateSecretKey());
         baseMapper.insert(permission);
+        PermissionRes res = new PermissionRes();
+        BeanUtils.copyProperties(permission, res);
+        res.setId(String.valueOf(permission.getId()));
+        return res;
     }
 
     @Override

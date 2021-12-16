@@ -88,10 +88,9 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("permission")
-    public Result<Void> savePermission(@RequestBody PermissionReq req) {
+    public Result<PermissionRes> savePermission(@RequestBody PermissionReq req) {
         req.setUid(currentUid());
-        permissionService.savePermission(req);
-        return Result.getSuccess();
+        return Result.getSuccess(permissionService.savePermission(req));
     }
 
     /**
