@@ -22,6 +22,7 @@ public interface ITradeService extends IService<Trade> {
      * @param takerOrder
      * @param makerOrder
      * @param quantity
+     * @return
      */
-    void saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity);
+    boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity);
 }

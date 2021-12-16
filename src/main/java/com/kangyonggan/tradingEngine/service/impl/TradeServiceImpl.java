@@ -28,7 +28,7 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     private ISymbolConfigService symbolConfigService;
 
     @Override
-    public void saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity) {
+    public boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity) {
         SymbolConfig symbolConfig = symbolConfigService.getSymbolConfig(takerOrder.getSymbol());
 
         Trade trade = new Trade();
@@ -41,5 +41,6 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         trade.setMakerFee(symbolConfig.getMakerFeeRate().multiply(takerOrder.getPrice()).multiply(quantity).setScale(symbolConfig.getPriceScale(), RoundingMode.UP));
 
         baseMapper.insert(trade);
+        return true;
     }
 }

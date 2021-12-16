@@ -188,10 +188,12 @@ public class TradingEngine {
                 // 和卖一成交
                 BigDecimal tradeQuantity = freeQuantity.compareTo(freeSellQuantity) > 0 ? freeSellQuantity : freeQuantity;
                 sellOrder.setTradeQuantity(sellOrder.getTradeQuantity().add(tradeQuantity));
+                // 保存交易
+                if (!tradeService.saveTrade(sellOrder, order, tradeQuantity)) {
+                    break;
+                }
                 // 更新卖盘
                 orderBook.updateOrder(sellOrder);
-                // 保存交易
-                tradeService.saveTrade(sellOrder, order, tradeQuantity);
                 freeQuantity = freeQuantity.subtract(tradeQuantity);
             }
 
@@ -237,10 +239,12 @@ public class TradingEngine {
                 // 和买一成交
                 BigDecimal tradeQuantity = freeQuantity.compareTo(freeBuyQuantity) > 0 ? freeBuyQuantity : freeQuantity;
                 buyOrder.setTradeQuantity(buyOrder.getTradeQuantity().add(tradeQuantity));
+                // 保存交易
+                if(!tradeService.saveTrade(buyOrder, order, tradeQuantity)) {
+                    break;
+                }
                 // 更新买盘
                 orderBook.updateOrder(buyOrder);
-                // 保存交易
-                tradeService.saveTrade(buyOrder, order, tradeQuantity);
                 freeQuantity = freeQuantity.subtract(tradeQuantity);
             }
 
