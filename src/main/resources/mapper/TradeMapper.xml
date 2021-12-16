@@ -12,6 +12,7 @@
         <result column="quantity" property="quantity" />
         <result column="taker_fee" property="takerFee" />
         <result column="maker_fee" property="makerFee" />
+        <result column="status" property="status" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>

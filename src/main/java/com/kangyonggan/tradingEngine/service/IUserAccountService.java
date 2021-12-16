@@ -1,5 +1,6 @@
 package com.kangyonggan.tradingEngine.service;
 
+import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.UserAccount;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -61,8 +62,9 @@ public interface IUserAccountService extends IService<UserAccount> {
      * @param currency
      * @param amount
      * @param fee
+     * @param tradeStatus
      */
-    void addAmount(String orderNo, String uid, String accountType, String currency, BigDecimal amount, BigDecimal fee);
+    void addAmount(String orderNo, String uid, String accountType, String currency, BigDecimal amount, BigDecimal fee, TradeStatus tradeStatus);
 
     /**
      * 减钱 -从冻结资金
@@ -76,4 +78,13 @@ public interface IUserAccountService extends IService<UserAccount> {
      */
     void reduceAmountFromFrozen(String orderNo, String uid, String accountType, String currency, BigDecimal amount, BigDecimal fee);
 
+    /**
+     * 获取用户账户锁
+     *
+     * @param uid
+     * @param accountType
+     * @param currency
+     * @return
+     */
+    Object getLock(String uid, String accountType, String currency);
 }

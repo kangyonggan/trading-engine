@@ -1,5 +1,6 @@
 package com.kangyonggan.tradingEngine.service;
 
+import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.Trade;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -25,4 +26,12 @@ public interface ITradeService extends IService<Trade> {
      * @return
      */
     boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity);
+
+    /**
+     * 更新交易状态
+     *
+     * @param id
+     * @param status
+     */
+    void updateTradeStatus(long id, TradeStatus status);
 }

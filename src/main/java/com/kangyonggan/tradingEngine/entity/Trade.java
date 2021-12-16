@@ -64,6 +64,11 @@ public class Trade implements Serializable {
     private BigDecimal makerFee;
 
     /**
+     * 状态
+     */
+    private String status;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

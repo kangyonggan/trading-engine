@@ -62,6 +62,8 @@ CREATE TABLE `trade`
         COMMENT 'Taker手续费',
     maker_fee      DECIMAL(20, 12)                       NOT NULL
         COMMENT 'Maker手续费',
+    status         VARCHAR(32)                           NOT NULL
+        COMMENT '状态',
     create_time    TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP
         COMMENT '创建时间',
     update_time    TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -136,7 +138,7 @@ CREATE TABLE user
 
 INSERT INTO user (uid, email)
     VALUE ('00000000', 'java@kangyonggan.com'),
-          ('00000001', 'test@kangyonggan.com');
+    ('00000001', 'test@kangyonggan.com');
 
 -- ----------------------------
 --  Table structure for user_account
@@ -169,8 +171,7 @@ CREATE TABLE user_account
     COMMENT '用户账户表';
 
 INSERT INTO user_account (uid, account_type, currency, total_amount, frozen_amount)
-VALUES
-       ('00000000', 'SPOT', 'USDT', 1000, 0),
+VALUES ('00000000', 'SPOT', 'USDT', 1000, 0),
        ('00000000', 'SPOT', 'BTC', 0, 0),
        ('00000000', 'SPOT', 'ETH', 0, 0),
        ('00000001', 'SPOT', 'USDT', 0, 0),

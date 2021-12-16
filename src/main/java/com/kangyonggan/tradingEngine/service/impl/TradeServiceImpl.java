@@ -5,6 +5,7 @@ import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.AccountType;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
+import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.entity.Trade;
@@ -43,61 +44,8 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Override
     public boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity) {
         SymbolConfig symbolConfig = symbolConfigService.getSymbolConfig(takerOrder.getSymbol());
-        boolean isBuy = makerOrder.getSide().equals(OrderSide.BUY.name());
-
-        // 判断maker余额是否充足
-        UserAccount makerAccount = userAccountService.getUserAccount(makerOrder.getUid(), AccountType.SPOT.name(),
-                isBuy ? AppConstants.USDT : makerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY));
-
-        BigDecimal makerNeedAmount;
-        BigDecimal makerGiveAmount;
         BigDecimal makerFee = quantity.multiply(takerOrder.getPrice()).multiply(symbolConfig.getMakerFeeRate());
-        if (isBuy) {
-            // 需要U，手续费也是U
-            makerNeedAmount = quantity.multiply(takerOrder.getPrice()).add(makerFee);
-            // 获得B
-            makerGiveAmount = quantity;
-        } else {
-            // 需要B
-            makerNeedAmount = quantity;
-            // 获得U，手续费是U
-            makerGiveAmount = quantity.multiply(takerOrder.getPrice()).subtract(makerFee);
-        }
-        if (makerAccount.getTotalAmount().subtract(makerAccount.getFrozenAmount()).compareTo(makerNeedAmount) < 0) {
-            log.info("账户余额不足，uid={}", makerAccount.getUid());
-            return false;
-        }
-        makerAccount.setTotalAmount(makerAccount.getTotalAmount().subtract(makerNeedAmount));
-        // 给maker减钱
-        userAccountService.reduceAmount(String.valueOf(makerOrder.getId()), makerAccount.getUid(), makerAccount.getAccountType(), makerAccount.getCurrency(),
-                makerNeedAmount, isBuy ? makerFee : BigDecimal.ZERO);
-        // 给maker加钱
-        userAccountService.addAmount(String.valueOf(makerOrder.getId()), makerAccount.getUid(), makerAccount.getAccountType(), isBuy ? makerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY) : AppConstants.USDT,
-                makerGiveAmount, isBuy ? BigDecimal.ZERO : makerFee);
-
-        BigDecimal takerNeedAmount;
-        BigDecimal takerGiveAmount;
         BigDecimal takerFee = quantity.multiply(takerOrder.getPrice()).multiply(symbolConfig.getTakerFeeRate());
-
-        if (isBuy) {
-            // 需要B
-            takerNeedAmount = quantity;
-            // 获得U，手续费也是U
-            takerGiveAmount = quantity.multiply(takerOrder.getPrice()).subtract(takerFee);
-        } else {
-            // 需要U,手续费是U
-            takerNeedAmount = quantity.multiply(takerOrder.getPrice()).add(takerFee);
-            // 获得B
-            takerGiveAmount = quantity;
-        }
-
-        // 给taker减钱
-        userAccountService.reduceAmountFromFrozen(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), isBuy ? takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY) : AppConstants.USDT,
-                takerNeedAmount, isBuy ? BigDecimal.ZERO : takerFee);
-
-        // 给taker加钱
-        userAccountService.addAmount(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), isBuy ? AppConstants.USDT : takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY),
-                takerGiveAmount, isBuy ? takerFee : BigDecimal.ZERO);
 
         Trade trade = new Trade();
         trade.setTakerOrderId(takerOrder.getId());
@@ -105,11 +53,77 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         trade.setSymbol(takerOrder.getSymbol());
         trade.setQuantity(quantity);
         trade.setPrice(takerOrder.getPrice());
-        trade.setTakerFee(symbolConfig.getTakerFeeRate().multiply(takerOrder.getPrice()).multiply(quantity).setScale(symbolConfig.getPriceScale(), RoundingMode.UP));
+        trade.setTakerFee(takerFee);
         trade.setMakerFee(makerFee);
+        trade.setStatus(TradeStatus.INIT.name());
         // 保存交易
         baseMapper.insert(trade);
 
+        // maker是否是买单
+        boolean isBuy = makerOrder.getSide().equals(OrderSide.BUY.name());
+        // maker出账币种
+        String makerReduceCurrency = isBuy ? AppConstants.USDT : makerOrder.getCurrency();
+        // maker入账币种
+        String makerAddCurrency = isBuy ? makerOrder.getCurrency() : AppConstants.USDT;
+        // taker出账币种
+        String takerReduceCurrency = isBuy ? makerOrder.getCurrency() : AppConstants.USDT;
+        // taker入账币种
+        String takerAddCurrency = isBuy ? AppConstants.USDT : makerOrder.getCurrency();
+
+        BigDecimal makerReduceAmount;
+        BigDecimal makerAddAmount;
+        synchronized (userAccountService.getLock(makerOrder.getUid(), AccountType.SPOT.name(), makerReduceCurrency)) {
+            // 判断maker出账账户余额是否充足
+            UserAccount makerReduceAccount = userAccountService.getUserAccount(makerOrder.getUid(), AccountType.SPOT.name(), makerReduceCurrency);
+
+            if (isBuy) {
+                // 主动买，需要U，手续费也是U
+                makerReduceAmount = quantity.multiply(takerOrder.getPrice()).add(makerFee);
+                // 主动买，获得B
+                makerAddAmount = quantity;
+            } else {
+                // 主动卖，需要B
+                makerReduceAmount = quantity;
+                // 主动卖，获得U，手续费是U
+                makerAddAmount = quantity.multiply(takerOrder.getPrice()).subtract(makerFee);
+            }
+            if (makerReduceAccount.getTotalAmount().subtract(makerReduceAccount.getFrozenAmount()).compareTo(makerReduceAmount) < 0) {
+                log.info("账户余额不足，无法吃单，uid={}，currency={}", makerReduceAccount.getUid(), makerReduceCurrency);
+                return false;
+            }
+            // 给maker减钱
+            userAccountService.reduceAmount(String.valueOf(trade.getId()), makerOrder.getUid(), AccountType.SPOT.name(), makerReduceCurrency, makerReduceAmount, isBuy ? makerFee : BigDecimal.ZERO);
+        }
+        // 给maker加钱
+        userAccountService.addAmount(String.valueOf(trade.getId()), makerOrder.getUid(), AccountType.SPOT.name(), makerAddCurrency, makerAddAmount, isBuy ? BigDecimal.ZERO : makerFee, TradeStatus.MAKER_REDUCE);
+
+        BigDecimal takerReduceAmount;
+        BigDecimal takerAddAmount;
+        if (isBuy) {
+            // 被动卖，需要B
+            takerReduceAmount = quantity;
+            // 被动卖，获得U，手续费也是U
+            takerAddAmount = quantity.multiply(takerOrder.getPrice()).subtract(takerFee);
+        } else {
+            // 被动卖，需要U,手续费是U
+            takerReduceAmount = quantity.multiply(takerOrder.getPrice()).add(takerFee);
+            // 被动卖，获得B
+            takerAddAmount = quantity;
+        }
+
+        // 给taker减钱
+        userAccountService.reduceAmountFromFrozen(String.valueOf(trade.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerReduceCurrency, takerReduceAmount, isBuy ? BigDecimal.ZERO : takerFee);
+
+        // 给taker加钱
+        userAccountService.addAmount(String.valueOf(trade.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerAddCurrency, takerAddAmount, isBuy ? takerFee : BigDecimal.ZERO, TradeStatus.TAKER_ADD);
         return true;
+    }
+
+    @Override
+    public void updateTradeStatus(long id, TradeStatus status) {
+        Trade trade = new Trade();
+        trade.setId(id);
+        trade.setStatus(status.name());
+        baseMapper.updateById(trade);
     }
 }

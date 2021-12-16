@@ -7,8 +7,10 @@ import java.time.LocalDateTime;
 import java.io.Serializable;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.kangyonggan.tradingEngine.constants.AppConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>
@@ -86,5 +88,8 @@ public class Order implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    public String getCurrency() {
+        return symbol.replace(AppConstants.USDT, StringUtils.EMPTY);
+    }
 
 }

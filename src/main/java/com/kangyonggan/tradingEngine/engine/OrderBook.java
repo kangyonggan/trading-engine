@@ -1,11 +1,15 @@
 package com.kangyonggan.tradingEngine.engine;
 
+import com.kangyonggan.tradingEngine.constants.AppConstants;
+import com.kangyonggan.tradingEngine.constants.enums.AccountType;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.service.IOrderService;
+import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -31,6 +35,9 @@ public class OrderBook {
 
     @Autowired
     private IOrderService orderService;
+
+    @Autowired
+    private IUserAccountService userAccountService;
 
     /**
      * 初始化买盘和卖盘
@@ -75,7 +82,11 @@ public class OrderBook {
      *
      * @param order
      */
+    @Transactional(rollbackFor = Exception.class)
     public void saveOrder(Order order) {
+        userAccountService.frozenAmount(order);
+        orderService.updateOrder(order);
+
         List<Order> orders;
         boolean isBuy = order.getSide().equals(OrderSide.BUY.name());
         if (isBuy) {
@@ -186,6 +197,8 @@ public class OrderBook {
         } else {
             sellOrderMap.put(order.getSymbol(), orders);
         }
-        orderService.updateOrder(order);
+        synchronized (userAccountService.getLock(order.getUid(), AccountType.SPOT.name(), isBuy ? AppConstants.USDT : order.getCurrency())) {
+            userAccountService.freeAmount(order);
+        }
     }
 }

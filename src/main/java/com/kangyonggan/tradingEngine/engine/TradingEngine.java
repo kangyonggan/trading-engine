@@ -2,10 +2,8 @@ package com.kangyonggan.tradingEngine.engine;
 
 import com.kangyonggan.tradingEngine.annotation.Valid;
 import com.kangyonggan.tradingEngine.components.BizException;
-import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
-import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
-import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
-import com.kangyonggan.tradingEngine.constants.enums.OrderType;
+import com.kangyonggan.tradingEngine.constants.AppConstants;
+import com.kangyonggan.tradingEngine.constants.enums.*;
 import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.CancelOrderRes;
 import com.kangyonggan.tradingEngine.dto.res.CreateOrderRes;
@@ -21,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -50,6 +47,9 @@ public class TradingEngine {
     @Autowired
     private IUserAccountService userAccountService;
 
+    @Autowired
+    private TradingEngine tradingEngine;
+
     /**
      * 下单
      *
@@ -57,7 +57,6 @@ public class TradingEngine {
      * @return
      */
     @Valid
-    @Transactional(rollbackFor = Exception.class)
     public CreateOrderRes createOrder(CreateOrderReq req) {
         checkOrder(req);
 
@@ -66,10 +65,10 @@ public class TradingEngine {
 
         if (req.getSide() == OrderSide.BUY) {
             // 处理买单
-            processBuyOrder(order);
+            tradingEngine.processBuyOrder(order);
         } else {
             // 处理卖单
-            processSellOrder(order);
+            tradingEngine.processSellOrder(order);
         }
 
         CreateOrderRes res = new CreateOrderRes();
@@ -104,7 +103,6 @@ public class TradingEngine {
      * @return
      */
     @Valid
-    @Transactional(rollbackFor = Exception.class)
     public CancelOrderRes cancelOrder(CancelOrderReq req) {
         CancelOrderRes res = new CancelOrderRes();
         if (StringUtils.isEmpty(req.getClientOrderNo()) && req.getSymbol() == null) {
@@ -119,7 +117,6 @@ public class TradingEngine {
             order.setStatus(OrderStatus.CANCELED.name());
 
             synchronized (getLock(order.getSymbol())) {
-                userAccountService.freeAmount(order);
                 orderBook.cancelOrder(order);
             }
             clientOrderNos.add(order.getClientOrderNo());
@@ -179,7 +176,7 @@ public class TradingEngine {
      *
      * @param order
      */
-    private void processBuyOrder(Order order) {
+    public void processBuyOrder(Order order) {
         synchronized (getLock(order.getSymbol())) {
             // 剩余可成交数量
             BigDecimal freeQuantity = order.getQuantity().subtract(order.getTradeQuantity());
@@ -187,10 +184,6 @@ public class TradingEngine {
                 Order sellOrder = orderBook.getSellOrder(order.getSymbol());
                 if (sellOrder == null || (order.getType().equals(OrderType.LIMIT.name()) && order.getPrice().compareTo(sellOrder.getPrice()) < 0)) {
                     // 卖盘为空 或者 委托价小于卖一价
-                    break;
-                }
-                // 不和自己交易
-                if (order.getUid().equals(sellOrder.getUid())) {
                     break;
                 }
 
@@ -220,12 +213,12 @@ public class TradingEngine {
                 }
             }
             order.setStatus(status.name());
-            orderService.updateOrder(order);
 
             if (status != OrderStatus.FILLED && order.getType().equals(OrderType.LIMIT.name())) {
                 // 还有部分没成交，放入买盘，冻结资产
-                userAccountService.frozenAmount(order);
-                orderBook.saveOrder(order);
+                synchronized(userAccountService.getLock(order.getUid(), AccountType.SPOT.name(), AppConstants.USDT)) {
+                    orderBook.saveOrder(order);
+                }
             }
         }
     }
@@ -235,7 +228,7 @@ public class TradingEngine {
      *
      * @param order
      */
-    private void processSellOrder(Order order) {
+    public void processSellOrder(Order order) {
         synchronized (getLock(order.getSymbol())) {
             // 剩余可成交数量
             BigDecimal freeQuantity = order.getQuantity().subtract(order.getTradeQuantity());
@@ -280,8 +273,9 @@ public class TradingEngine {
 
             if (status != OrderStatus.FILLED && order.getType().equals(OrderType.LIMIT.name())) {
                 // 还有部分没成交，放入卖盘，冻结资产
-                userAccountService.frozenAmount(order);
-                orderBook.saveOrder(order);
+                synchronized(userAccountService.getLock(order.getUid(), AccountType.SPOT.name(), order.getCurrency())) {
+                    orderBook.saveOrder(order);
+                }
             }
         }
     }
