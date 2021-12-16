@@ -44,9 +44,9 @@ public class UserAccountLog implements Serializable {
     private String accountType;
 
     /**
-     * 交易对
+     * 币种
      */
-    private String symbol;
+    private String currency;
 
     /**
      * 类型

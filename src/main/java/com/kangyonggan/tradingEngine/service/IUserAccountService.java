@@ -1,11 +1,13 @@
 package com.kangyonggan.tradingEngine.service;
 
 import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
+import com.kangyonggan.tradingEngine.dto.res.AccountRes;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.UserAccount;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -87,4 +89,13 @@ public interface IUserAccountService extends IService<UserAccount> {
      * @return
      */
     Object getLock(String uid, String accountType, String currency);
+
+    /**
+     * 查询用户账户列表
+     *
+     * @param uid
+     * @return
+     */
+    List<AccountRes> getAccounts(String uid);
+
 }

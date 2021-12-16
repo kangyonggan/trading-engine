@@ -15,4 +15,20 @@
         <result column="update_time" property="updateTime" />
     </resultMap>
 
+    <select id="selectAccount" resultType="com.kangyonggan.tradingEngine.dto.res.AccountRes">
+        SELECT
+            a.id,
+            a.account_type AS accountType,
+            a.currency,
+            a.total_amount AS totalAmount,
+            a.frozen_amount AS frozenAmount,
+            a.enable,
+            a.create_time AS createTime,
+            a.update_time AS updateTime
+        FROM user_account a, symbol_config b
+        WHERE b.symbol = CONCAT(a.currency, 'USDT')
+        AND a.uid = #{uid}
+        ORDER BY b.sort
+    </select>
+
 </mapper>

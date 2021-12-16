@@ -1,15 +1,17 @@
 package com.kangyonggan.tradingEngine.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
-import com.kangyonggan.tradingEngine.dto.req.PermissionReq;
-import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
-import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
-import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
+import com.kangyonggan.tradingEngine.dto.req.*;
+import com.kangyonggan.tradingEngine.dto.res.AccountRes;
 import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.dto.res.Result;
 import com.kangyonggan.tradingEngine.entity.User;
+import com.kangyonggan.tradingEngine.entity.UserAccountLog;
 import com.kangyonggan.tradingEngine.service.IPermissionService;
+import com.kangyonggan.tradingEngine.service.IUserAccountLogService;
+import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +27,12 @@ public class UserController extends BaseController {
 
     @Autowired
     private IPermissionService permissionService;
+
+    @Autowired
+    private IUserAccountService userAccountService;
+
+    @Autowired
+    private IUserAccountLogService userAccountLogService;
 
     /**
      * 登录
@@ -128,6 +136,28 @@ public class UserController extends BaseController {
         req.setUid(currentUid());
         permissionService.deletePermission(req);
         return Result.getSuccess();
+    }
+
+    /**
+     * 用户账户列表
+     *
+     * @return
+     */
+    @GetMapping("account")
+    public Result<List<AccountRes>> accounts() {
+        return Result.getSuccess(userAccountService.getAccounts(currentUid()));
+    }
+
+    /**
+     * 用户账户流水
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("account")
+    public Result<Page<UserAccountLog>> accountLogs(AccountLogReq<UserAccountLog> req) {
+        req.setUid(currentUid());
+        return Result.getSuccess(userAccountLogService.getAccountLogs(req));
     }
 
 }

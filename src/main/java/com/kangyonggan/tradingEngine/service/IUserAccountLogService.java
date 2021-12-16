@@ -1,7 +1,9 @@
 package com.kangyonggan.tradingEngine.service;
 
-import com.kangyonggan.tradingEngine.entity.UserAccountLog;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kangyonggan.tradingEngine.dto.req.AccountLogReq;
+import com.kangyonggan.tradingEngine.entity.UserAccountLog;
 
 import java.math.BigDecimal;
 
@@ -21,9 +23,17 @@ public interface IUserAccountLogService extends IService<UserAccountLog> {
      * @param uid
      * @param orderNo
      * @param accountType
-     * @param symbol
+     * @param currency
      * @param amount
      * @param type
      */
-    void saveAccountLog(String uid, String orderNo, String accountType, String symbol, BigDecimal amount, String type);
+    void saveAccountLog(String uid, String orderNo, String accountType, String currency, BigDecimal amount, String type);
+
+    /**
+     * 用户账户流水
+     *
+     * @param req
+     * @return
+     */
+    Page<UserAccountLog> getAccountLogs(AccountLogReq<UserAccountLog> req);
 }

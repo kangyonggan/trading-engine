@@ -194,8 +194,8 @@ CREATE TABLE user_account_log
         COMMENT '订单号',
     account_type VARCHAR(16)                           NOT NULL
         COMMENT '账户类型',
-    symbol       VARCHAR(64)                           NOT NULL
-        COMMENT '交易对',
+    currency     VARCHAR(16)                           NOT NULL
+        COMMENT '币种',
     type         VARCHAR(16)                           NOT NULL
         COMMENT '类型',
     amount       DECIMAL(20, 12)                       NOT NULL DEFAULT 0

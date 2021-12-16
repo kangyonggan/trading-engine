@@ -1,17 +1,18 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.AccountLogType;
 import com.kangyonggan.tradingEngine.constants.enums.AccountType;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
+import com.kangyonggan.tradingEngine.dto.res.AccountRes;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.entity.UserAccount;
 import com.kangyonggan.tradingEngine.mapper.UserAccountMapper;
 import com.kangyonggan.tradingEngine.service.*;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -89,11 +91,11 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         // 交易流水
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
+        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
 
         // 手续费流水
         if (BigDecimal.ZERO.compareTo(fee) != 0) {
-            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
         }
 
         // 更新交易状态
@@ -108,11 +110,11 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         // 交易流水
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, amount, AccountLogType.SPOT.name());
+        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency, amount, AccountLogType.SPOT.name());
 
         // 手续费流水
         if (BigDecimal.ZERO.compareTo(fee) != 0) {
-            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
         }
 
         // 更新交易状态
@@ -128,11 +130,11 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         // 交易流水
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
+        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
 
         // 手续费流水
         if (BigDecimal.ZERO.compareTo(fee) != 0) {
-            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
         }
 
         // 更新交易状态
@@ -148,5 +150,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
             }
         }
         return lock;
+    }
+
+    @Override
+    public List<AccountRes> getAccounts(String uid) {
+        return baseMapper.selectAccount(uid);
     }
 }

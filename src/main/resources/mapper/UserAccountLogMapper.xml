@@ -8,7 +8,7 @@
         <result column="uid" property="uid" />
         <result column="order_no" property="orderNo" />
         <result column="account_type" property="accountType" />
-        <result column="symbol" property="symbol" />
+        <result column="currency" property="currency" />
         <result column="type" property="type" />
         <result column="amount" property="amount" />
         <result column="enable" property="enable" />
