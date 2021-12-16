@@ -33,7 +33,7 @@ public class OrderController extends BaseController {
     @PostMapping
     @ApiAccess
     public Result<CreateOrderRes> createOrder(@RequestBody CreateOrderReq req) {
-        req.setUid(currentUid());
+        req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.createOrder(req));
     }
 
@@ -46,7 +46,7 @@ public class OrderController extends BaseController {
     @DeleteMapping
     @ApiAccess
     public Result<CancelOrderRes> cancelOrder(@RequestBody CancelOrderReq req) {
-        req.setUid(currentUid());
+        req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.cancelOrder(req));
     }
 
@@ -59,7 +59,7 @@ public class OrderController extends BaseController {
     @GetMapping
     @ApiAccess
     public Result<OrderRes> getOrder(GetOrderReq req) {
-        req.setUid(currentUid());
+        req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.getOrder(req));
     }
 
@@ -72,7 +72,7 @@ public class OrderController extends BaseController {
     @GetMapping("openOrders")
     @ApiAccess
     public Result<List<OrderRes>> openOrders(OpenOrderReq req) {
-        req.setUid(currentUid());
+        req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.openOrders(req));
     }
 
@@ -85,7 +85,7 @@ public class OrderController extends BaseController {
     @GetMapping("allOrders")
     @ApiAccess
     public Result<List<OrderRes>> allOrders(AllOrderReq req) {
-        req.setUid(currentUid());
+        req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.allOrders(req));
     }
 

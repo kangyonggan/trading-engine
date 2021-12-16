@@ -58,7 +58,9 @@ public class ApiSignature {
         } catch (Exception e) {
             throw new BizException("签名异常");
         }
-        return new String(Hex.encodeHex(hmacSha256.doFinal(appendUrl(params).getBytes())));
+        String sign = new String(Hex.encodeHex(hmacSha256.doFinal(appendUrl(params).getBytes())));
+        params.put(SIGNATURE_KEY, sign);
+        return sign;
     }
 
     /**

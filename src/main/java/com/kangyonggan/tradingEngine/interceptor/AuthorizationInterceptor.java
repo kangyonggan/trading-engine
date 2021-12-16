@@ -155,7 +155,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         Map<String, String[]> params = request.getParameterMap();
         RequestParams<String, Object> resultMap = new RequestParams<>();
         for (String key : params.keySet()) {
-            resultMap.put(key, params.get(key));
+            resultMap.put(key, params.get(key)[0]);
         }
         return resultMap;
     }

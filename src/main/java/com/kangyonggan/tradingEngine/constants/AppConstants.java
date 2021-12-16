@@ -28,4 +28,6 @@ public interface AppConstants {
 
     String ENV_DEV = "dev";
 
+    String APPLICATION_JSON = "application/json";
+
 }

@@ -4,7 +4,9 @@ import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.components.MessageHandler;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.dto.res.Result;
+import com.kangyonggan.tradingEngine.entity.Permission;
 import com.kangyonggan.tradingEngine.entity.User;
+import com.kangyonggan.tradingEngine.service.IPermissionService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,9 @@ public class BaseController {
 
     @Autowired
     protected IUserService userService;
+
+    @Autowired
+    protected IPermissionService permissionService;
 
     @Autowired
     private MessageHandler messageHandler;
@@ -75,5 +80,22 @@ public class BaseController {
      */
     protected String currentUid() {
         return currentUser().getUid();
+    }
+
+    /**
+     * 获取当前Api用户的uid
+     *
+     * @return
+     */
+    protected String currentApiUid() {
+        String apiKey = request.getHeader(AppConstants.HEADER_APIKEY);
+        if (StringUtils.isEmpty(apiKey)) {
+            return null;
+        }
+        Permission permission = permissionService.getPermissionByApiKey(apiKey);
+        if (permission == null) {
+            return null;
+        }
+        return permission.getUid();
     }
 }
