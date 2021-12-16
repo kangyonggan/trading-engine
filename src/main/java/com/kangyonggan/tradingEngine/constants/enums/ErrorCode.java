@@ -67,6 +67,11 @@ public enum ErrorCode {
      */
     ORDER_NOT_EXISTS("1001"),
 
+    /**
+     * 账户余额不足
+     */
+    BALANCE_LITTLE("1002"),
+
     ;
     /**
      * 响应码

@@ -168,7 +168,10 @@ CREATE TABLE user_account
     COMMENT '用户账户表';
 
 INSERT INTO user_account (uid, account_type, currency, total_amount, frozen_amount)
-VALUES ('00000000', 'SPOT', 'USDT', 100000, 0);
+VALUES
+       ('00000000', 'SPOT', 'USDT', 100000, 0),
+       ('00000000', 'SPOT', 'BTC', 0, 0),
+       ('00000000', 'SPOT', 'ETH', 0, 0);
 
 -- ----------------------------
 --  Table structure for user_account_log
@@ -192,8 +195,6 @@ CREATE TABLE user_account_log
         COMMENT '类型',
     amount       DECIMAL(20, 12)                       NOT NULL DEFAULT 0
         COMMENT '金额',
-    status       VARCHAR(16)                           NOT NULL
-        COMMENT '状态',
     enable       TINYINT                               NOT NULL DEFAULT 1
         COMMENT '是否可用',
     create_time  TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP

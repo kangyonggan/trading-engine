@@ -59,11 +59,6 @@ public class UserAccountLog implements Serializable {
     private BigDecimal amount;
 
     /**
-     * 状态
-     */
-    private String status;
-
-    /**
      * 是否可用
      */
     private Integer enable;

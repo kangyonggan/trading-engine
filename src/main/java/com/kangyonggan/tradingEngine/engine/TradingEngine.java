@@ -15,6 +15,7 @@ import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.service.IOrderService;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
 import com.kangyonggan.tradingEngine.service.ITradeService;
+import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import com.kangyonggan.tradingEngine.util.ValidUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +46,9 @@ public class TradingEngine {
 
     @Autowired
     private ISymbolConfigService symbolConfigService;
+
+    @Autowired
+    private IUserAccountService userAccountService;
 
     /**
      * 下单
@@ -100,6 +104,7 @@ public class TradingEngine {
      * @return
      */
     @Valid
+    @Transactional(rollbackFor = Exception.class)
     public CancelOrderRes cancelOrder(CancelOrderReq req) {
         CancelOrderRes res = new CancelOrderRes();
         if (StringUtils.isEmpty(req.getClientOrderNo()) && req.getSymbol() == null) {
@@ -114,6 +119,7 @@ public class TradingEngine {
             order.setStatus(OrderStatus.CANCELED.name());
 
             synchronized (getLock(order.getSymbol())) {
+                userAccountService.freeAmount(order);
                 orderBook.cancelOrder(order);
             }
             clientOrderNos.add(order.getClientOrderNo());
@@ -213,7 +219,8 @@ public class TradingEngine {
             orderService.updateOrder(order);
 
             if (status != OrderStatus.FILLED && order.getType().equals(OrderType.LIMIT.name())) {
-                // 还有部分没成交，放入买盘
+                // 还有部分没成交，放入买盘，冻结资产
+                userAccountService.frozenAmount(order);
                 orderBook.saveOrder(order);
             }
         }
@@ -264,7 +271,8 @@ public class TradingEngine {
             orderService.updateOrder(order);
 
             if (status != OrderStatus.FILLED && order.getType().equals(OrderType.LIMIT.name())) {
-                // 还有部分没成交，放入买盘
+                // 还有部分没成交，放入卖盘，冻结资产
+                userAccountService.frozenAmount(order);
                 orderBook.saveOrder(order);
             }
         }
