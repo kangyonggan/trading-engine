@@ -189,6 +189,10 @@ public class TradingEngine {
                     // 卖盘为空 或者 委托价小于卖一价
                     break;
                 }
+                // 不和自己交易
+                if (order.getUid().equals(sellOrder.getUid())) {
+                    break;
+                }
 
                 BigDecimal freeSellQuantity = sellOrder.getQuantity().subtract(sellOrder.getTradeQuantity());
                 // 和卖一成交
@@ -239,6 +243,10 @@ public class TradingEngine {
                 Order buyOrder = orderBook.getBuyOrder(order.getSymbol());
                 if (buyOrder == null || (order.getType().equals(OrderType.LIMIT.name()) && order.getPrice().compareTo(buyOrder.getPrice()) > 0)) {
                     // 买盘为空 或者 委托价大于买一价
+                    break;
+                }
+                // 不和自己交易
+                if (order.getUid().equals(buyOrder.getUid())) {
                     break;
                 }
 

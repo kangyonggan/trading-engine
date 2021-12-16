@@ -135,7 +135,8 @@ CREATE TABLE user
     COMMENT '用户表';
 
 INSERT INTO user (uid, email)
-    VALUE ('00000000', 'java@kangyonggan.com');
+    VALUE ('00000000', 'java@kangyonggan.com'),
+          ('00000001', 'test@kangyonggan.com');
 
 -- ----------------------------
 --  Table structure for user_account
@@ -169,9 +170,12 @@ CREATE TABLE user_account
 
 INSERT INTO user_account (uid, account_type, currency, total_amount, frozen_amount)
 VALUES
-       ('00000000', 'SPOT', 'USDT', 100000, 0),
-       ('00000000', 'SPOT', 'BTC', 100000, 0),
-       ('00000000', 'SPOT', 'ETH', 100000, 0);
+       ('00000000', 'SPOT', 'USDT', 1000, 0),
+       ('00000000', 'SPOT', 'BTC', 0, 0),
+       ('00000000', 'SPOT', 'ETH', 0, 0),
+       ('00000001', 'SPOT', 'USDT', 0, 0),
+       ('00000001', 'SPOT', 'BTC', 0, 0),
+       ('00000001', 'SPOT', 'ETH', 1000, 0);
 
 -- ----------------------------
 --  Table structure for user_account_log

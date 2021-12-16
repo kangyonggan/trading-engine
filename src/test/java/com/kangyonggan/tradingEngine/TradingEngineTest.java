@@ -17,24 +17,41 @@ public class TradingEngineTest extends AbstractTest {
 
     @Autowired
     private TradingEngine tradingEngine;
+    
+    private static final String UID = "00000000";
+    private static final String UID_TEST = "00000001";
 
     @Test
     public void createOrderLimitBuy() {
         CreateOrderReq req = new CreateOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setClientOrderNo(String.valueOf(System.currentTimeMillis()));
         req.setSymbol(Symbol.ETHUSDT);
         req.setType(OrderType.LIMIT);
         req.setSide(OrderSide.BUY);
-        req.setQuantity(BigDecimal.ONE);
-        req.setPrice(BigDecimal.ONE);
+        req.setQuantity(BigDecimal.valueOf(0.5));
+        req.setPrice(BigDecimal.valueOf(1000));
+        LOGGER.info("下单返回：{}", tradingEngine.createOrder(req));
+
+        createOrderMarketSell();
+    }
+
+    @Test
+    public void createOrderMarketSell() {
+        CreateOrderReq req = new CreateOrderReq();
+        req.setUid(UID_TEST);
+        req.setClientOrderNo(String.valueOf(System.currentTimeMillis()));
+        req.setSymbol(Symbol.ETHUSDT);
+        req.setType(OrderType.MARKET);
+        req.setSide(OrderSide.SELL);
+        req.setQuantity(BigDecimal.valueOf(0.4));
         LOGGER.info("下单返回：{}", tradingEngine.createOrder(req));
     }
 
     @Test
     public void createOrderMarketBuy() {
         CreateOrderReq req = new CreateOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setClientOrderNo(String.valueOf(System.currentTimeMillis()));
         req.setSymbol(Symbol.ETHUSDT);
         req.setType(OrderType.MARKET);
@@ -46,7 +63,7 @@ public class TradingEngineTest extends AbstractTest {
     @Test
     public void createOrderLimitSell() {
         CreateOrderReq req = new CreateOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setClientOrderNo(String.valueOf(System.currentTimeMillis()));
         req.setSymbol(Symbol.ETHUSDT);
         req.setType(OrderType.LIMIT);
@@ -57,21 +74,9 @@ public class TradingEngineTest extends AbstractTest {
     }
 
     @Test
-    public void createOrderMarketSell() {
-        CreateOrderReq req = new CreateOrderReq();
-        req.setUid("13245678");
-        req.setClientOrderNo(String.valueOf(System.currentTimeMillis()));
-        req.setSymbol(Symbol.ETHUSDT);
-        req.setType(OrderType.MARKET);
-        req.setSide(OrderSide.SELL);
-        req.setQuantity(BigDecimal.valueOf(0.4));
-        LOGGER.info("下单返回：{}", tradingEngine.createOrder(req));
-    }
-
-    @Test
     public void getOrder() {
         GetOrderReq req = new GetOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setClientOrderNo("1639399633157");
         LOGGER.info("查询订单：{}", tradingEngine.getOrder(req));
     }
@@ -79,7 +84,7 @@ public class TradingEngineTest extends AbstractTest {
     @Test
     public void cancelOrder() {
         CancelOrderReq req = new CancelOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setClientOrderNo("1639399904451");
         LOGGER.info("撤销订单返回：{}", tradingEngine.cancelOrder(req));
     }
@@ -87,7 +92,7 @@ public class TradingEngineTest extends AbstractTest {
     @Test
     public void cancelOrderBySymbol() {
         CancelOrderReq req = new CancelOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setSymbol(Symbol.ETHUSDT);
         LOGGER.info("撤销订单返回：{}", tradingEngine.cancelOrder(req));
     }
@@ -95,7 +100,7 @@ public class TradingEngineTest extends AbstractTest {
     @Test
     public void openOrders() {
         OpenOrderReq req = new OpenOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setSymbol(Symbol.ETHUSDT);
         LOGGER.info("当前挂单返回：{}", tradingEngine.openOrders(req));
     }
@@ -103,7 +108,7 @@ public class TradingEngineTest extends AbstractTest {
     @Test
     public void allOrders() {
         AllOrderReq req = new AllOrderReq();
-        req.setUid("13245678");
+        req.setUid(UID);
         req.setSymbol(Symbol.ETHUSDT);
         req.setOrderId(0L);
         LOGGER.info("全部订单返回：{}", tradingEngine.allOrders(req));

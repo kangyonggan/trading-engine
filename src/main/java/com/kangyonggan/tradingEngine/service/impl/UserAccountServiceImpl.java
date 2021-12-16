@@ -45,7 +45,6 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         String currency = isBuy ? AppConstants.USDT : order.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY);
         UserAccount userAccount = getUserAccount(order.getUid(), AccountType.SPOT.name(), currency);
 
-        userAccount.setTotalAmount(userAccount.getTotalAmount().subtract(amount).subtract(fee));
         userAccount.setFrozenAmount(userAccount.getFrozenAmount().add(amount).add(fee));
         baseMapper.updateById(userAccount);
     }
@@ -59,7 +58,6 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         String currency = isBuy ? AppConstants.USDT : order.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY);
         UserAccount userAccount = getUserAccount(order.getUid(), AccountType.SPOT.name(), currency);
 
-        userAccount.setTotalAmount(userAccount.getTotalAmount().add(amount).add(fee));
         userAccount.setFrozenAmount(userAccount.getFrozenAmount().subtract(amount).subtract(fee));
         baseMapper.updateById(userAccount);
     }
@@ -78,7 +76,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+
+        if (BigDecimal.ZERO.compareTo(fee) != 0) {
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+        }
     }
 
     @Override
@@ -88,7 +89,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, amount, AccountLogType.SPOT.name());
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+
+        if (BigDecimal.ZERO.compareTo(fee) != 0) {
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+        }
     }
 
     @Override
@@ -99,6 +103,8 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         baseMapper.updateById(userAccount);
 
         userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(amount), AccountLogType.SPOT.name());
-        userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+        if (BigDecimal.ZERO.compareTo(fee) != 0) {
+            userAccountLogService.saveAccountLog(uid, orderNo, accountType, currency + AppConstants.USDT, BigDecimal.ZERO.subtract(fee), AccountLogType.FEE.name());
+        }
     }
 }

@@ -70,11 +70,10 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         makerAccount.setTotalAmount(makerAccount.getTotalAmount().subtract(makerNeedAmount));
         // 给maker减钱
         userAccountService.reduceAmount(String.valueOf(makerOrder.getId()), makerAccount.getUid(), makerAccount.getAccountType(), makerAccount.getCurrency(),
-                makerNeedAmount, makerFee);
+                makerNeedAmount, isBuy ? makerFee : BigDecimal.ZERO);
         // 给maker加钱
-        userAccountService.addAmount(String.valueOf(makerOrder.getId()), makerAccount.getUid(), makerAccount.getAccountType(), takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY),
-                makerGiveAmount, makerFee);
-
+        userAccountService.addAmount(String.valueOf(makerOrder.getId()), makerAccount.getUid(), makerAccount.getAccountType(), isBuy ? makerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY) : AppConstants.USDT,
+                makerGiveAmount, isBuy ? BigDecimal.ZERO : makerFee);
 
         BigDecimal takerNeedAmount;
         BigDecimal takerGiveAmount;
@@ -87,18 +86,18 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
             takerGiveAmount = quantity.multiply(takerOrder.getPrice()).subtract(takerFee);
         } else {
             // 需要U,手续费是U
-            takerNeedAmount = quantity.multiply(takerOrder.getPrice()).subtract(takerFee);
+            takerNeedAmount = quantity.multiply(takerOrder.getPrice()).add(takerFee);
             // 获得B
             takerGiveAmount = quantity;
         }
 
         // 给taker减钱
-        userAccountService.reduceAmountFromFrozen(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY),
-                takerNeedAmount, takerFee);
+        userAccountService.reduceAmountFromFrozen(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), isBuy ? takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY) : AppConstants.USDT,
+                takerNeedAmount, isBuy ? BigDecimal.ZERO : takerFee);
 
         // 给taker加钱
-        userAccountService.addAmount(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY),
-                takerGiveAmount, takerFee);
+        userAccountService.addAmount(String.valueOf(takerOrder.getId()), takerOrder.getUid(), AccountType.SPOT.name(), isBuy ? AppConstants.USDT : takerOrder.getSymbol().replace(AppConstants.USDT, StringUtils.EMPTY),
+                takerGiveAmount, isBuy ? takerFee : BigDecimal.ZERO);
 
         Trade trade = new Trade();
         trade.setTakerOrderId(takerOrder.getId());
