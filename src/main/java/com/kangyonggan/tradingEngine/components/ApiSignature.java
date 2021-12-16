@@ -31,9 +31,14 @@ public class ApiSignature {
      * @return
      */
     public boolean verify(RequestParams<String, Object> params, String secretKey) {
+        Long ts = (Long) params.get(TIMESTAMP_KEY);
+        if (Math.abs(System.currentTimeMillis() - ts) > 2000L) {
+            throw new BizException("验签异常，时间偏移过大");
+        }
+
         String sign = (String) params.get(SIGNATURE_KEY);
         if (StringUtils.isEmpty(sign)) {
-            throw new BizException("验签异常");
+            throw new BizException("验签异常，签名为空");
         }
         return sign.equals(signature(params, secretKey));
     }
