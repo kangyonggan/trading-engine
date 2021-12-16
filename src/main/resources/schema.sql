@@ -170,8 +170,8 @@ CREATE TABLE user_account
 INSERT INTO user_account (uid, account_type, currency, total_amount, frozen_amount)
 VALUES
        ('00000000', 'SPOT', 'USDT', 100000, 0),
-       ('00000000', 'SPOT', 'BTC', 0, 0),
-       ('00000000', 'SPOT', 'ETH', 0, 0);
+       ('00000000', 'SPOT', 'BTC', 100000, 0),
+       ('00000000', 'SPOT', 'ETH', 100000, 0);
 
 -- ----------------------------
 --  Table structure for user_account_log
