@@ -107,6 +107,18 @@ public class UserController extends BaseController {
     }
 
     /**
+     * 查看权限
+     *
+     * @param id
+     * @param emailCode
+     * @return
+     */
+    @GetMapping("permission/{id:[\\d+]}")
+    public Result<PermissionRes> getPermission(@PathVariable Long id, @RequestParam String emailCode) {
+        return Result.getSuccess(permissionService.getPermission(id, emailCode, currentUid()));
+    }
+
+    /**
      * 删除权限
      *
      * @return

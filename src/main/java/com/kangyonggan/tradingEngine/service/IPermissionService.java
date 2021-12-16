@@ -33,6 +33,16 @@ public interface IPermissionService extends IService<Permission> {
     PermissionRes savePermission(PermissionReq req);
 
     /**
+     * 查看权限
+     *
+     * @param id
+     * @param emailCode
+     * @param uid
+     * @return
+     */
+    PermissionRes getPermission(Long id, String emailCode, String uid);
+
+    /**
      * 修改权限
      *
      * @param req
@@ -45,4 +55,5 @@ public interface IPermissionService extends IService<Permission> {
      * @param req
      */
     void deletePermission(PermissionReq req);
+
 }

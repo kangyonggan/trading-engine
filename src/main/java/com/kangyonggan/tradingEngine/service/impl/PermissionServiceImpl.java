@@ -70,12 +70,35 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         User user = userService.getUserByUid(req.getUid());
         checkVerifyCode(user.getEmail(), EmailType.API, req.getEmailCode());
 
+        QueryWrapper<Permission> qw = new QueryWrapper<>();
+        qw.eq("uid", req.getUid()).eq("enable", Enable.YES.getValue());
+        if (baseMapper.selectCount(qw) >= 30) {
+            throw new BizException(ErrorCode.USER_API_MAX);
+        }
+
         Permission permission = new Permission();
         permission.setUid(req.getUid());
         permission.setRemark(req.getRemark());
         permission.setApiKey(generateApiKey());
         permission.setSecretKey(generateSecretKey());
         baseMapper.insert(permission);
+        PermissionRes res = new PermissionRes();
+        BeanUtils.copyProperties(permission, res);
+        res.setId(String.valueOf(permission.getId()));
+        return res;
+    }
+
+    @Override
+    public PermissionRes getPermission(Long id, String emailCode, String uid) {
+        User user = userService.getUserByUid(uid);
+        checkVerifyCode(user.getEmail(), EmailType.API, emailCode);
+
+        QueryWrapper<Permission> qw = new QueryWrapper<>();
+        qw.eq("id", id).eq("uid", uid).eq("enable", Enable.YES.getValue());
+        Permission permission = baseMapper.selectOne(qw);
+        if (permission == null) {
+            return null;
+        }
         PermissionRes res = new PermissionRes();
         BeanUtils.copyProperties(permission, res);
         res.setId(String.valueOf(permission.getId()));
