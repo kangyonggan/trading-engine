@@ -2,13 +2,24 @@ package com.kangyonggan.tradingEngine.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kangyonggan.tradingEngine.components.BizException;
+import com.kangyonggan.tradingEngine.constants.AppConstants;
+import com.kangyonggan.tradingEngine.constants.enums.EmailCheckStatus;
+import com.kangyonggan.tradingEngine.constants.enums.EmailType;
 import com.kangyonggan.tradingEngine.constants.enums.Enable;
+import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
+import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
 import com.kangyonggan.tradingEngine.dto.req.PermissionReq;
 import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.entity.Permission;
+import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.mapper.PermissionMapper;
+import com.kangyonggan.tradingEngine.service.IEmailService;
 import com.kangyonggan.tradingEngine.service.IPermissionService;
+import com.kangyonggan.tradingEngine.service.IUserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
@@ -26,6 +37,15 @@ import java.util.List;
  */
 @Service
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements IPermissionService {
+
+    @Autowired
+    private IEmailService emailService;
+
+    @Autowired
+    private IUserService userService;
+
+    @Value("${spring.profiles.active}")
+    private String env;
 
     @Override
     public List<PermissionRes> getPermissionList(String uid) {
@@ -47,6 +67,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public PermissionRes savePermission(PermissionReq req) {
+        User user = userService.getUserByUid(req.getUid());
+        checkVerifyCode(user.getEmail(), EmailType.API, req.getEmailCode());
+
         Permission permission = new Permission();
         permission.setUid(req.getUid());
         permission.setRemark(req.getRemark());
@@ -102,5 +125,29 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         return DatatypeConverter.printHexBinary(bytes).toLowerCase();
+    }
+
+    /**
+     * 校验邮箱验证码
+     *
+     * @param email
+     * @param emailType
+     * @param verifyCode
+     */
+    private void checkVerifyCode(String email, EmailType emailType, String verifyCode) {
+        // dev环境不校验验证码
+        if (AppConstants.ENV_DEV.equals(env)) {
+            return;
+        }
+        CheckEmailCodeReq req = new CheckEmailCodeReq();
+        req.setType(emailType);
+        req.setEmail(email);
+        req.setVerifyCode(verifyCode);
+        EmailCheckStatus checkStatus = emailService.checkEmailCode(req);
+        if (checkStatus.equals(EmailCheckStatus.FAILURE)) {
+            throw new BizException(ErrorCode.USER_VERIFY_CODE_ERROR);
+        } else if (checkStatus.equals(EmailCheckStatus.INVALID)) {
+            throw new BizException(ErrorCode.USER_VERIFY_CODE_INVALID);
+        }
     }
 }

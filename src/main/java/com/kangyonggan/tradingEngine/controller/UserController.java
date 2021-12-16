@@ -112,7 +112,7 @@ public class UserController extends BaseController {
      * @return
      */
     @DeleteMapping("permission")
-    public Result<Void> deletePermission(@RequestBody PermissionReq req) {
+    public Result<Void> deletePermission(PermissionReq req) {
         req.setUid(currentUid());
         permissionService.deletePermission(req);
         return Result.getSuccess();

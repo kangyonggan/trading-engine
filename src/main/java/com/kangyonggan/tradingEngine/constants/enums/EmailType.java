@@ -6,11 +6,6 @@ package com.kangyonggan.tradingEngine.constants.enums;
 public enum EmailType {
 
     /**
-     * 注册
-     */
-    REGISTER,
-
-    /**
      * 登录
      */
     LOGIN,
@@ -19,5 +14,10 @@ public enum EmailType {
      * 设置密码
      */
     SET_PASSWORD,
+
+    /**
+     * 创建API
+     */
+    API,
 
 }

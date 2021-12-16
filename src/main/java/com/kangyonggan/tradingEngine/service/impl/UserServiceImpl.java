@@ -60,15 +60,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public User login(UserLoginReq req) {
         User user = getUserByEmail(req.getEmail());
         if (LoginType.BY_CODE.equals(req.getLoginType())) {
-            // dev环境不校验验证码
-            if (!AppConstants.ENV_DEV.equals(env)) {
-                checkVerifyCode(req.getEmail(), EmailType.LOGIN, req.getVerifyCode());
-            }
+            checkVerifyCode(req.getEmail(), EmailType.LOGIN, req.getVerifyCode());
             // 使用验证码登录，用户不存在注册
             if (user == null) {
-                // 校验邮箱验证码
-                checkVerifyCode(req.getEmail(), EmailType.REGISTER, req.getVerifyCode());
-
                 // 保存用户相关信息
                 user = saveUserInfo(req);
             }
@@ -188,6 +182,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      * @param verifyCode
      */
     private void checkVerifyCode(String email, EmailType emailType, String verifyCode) {
+        // dev环境不校验验证码
+        if (AppConstants.ENV_DEV.equals(env)) {
+            return;
+        }
         CheckEmailCodeReq req = new CheckEmailCodeReq();
         req.setType(emailType);
         req.setEmail(email);
