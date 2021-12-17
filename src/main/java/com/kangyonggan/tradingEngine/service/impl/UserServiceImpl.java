@@ -126,7 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 查询用户邮箱
         User user = getUserByUid(req.getUid());
         // 校验邮箱验证码
-        checkVerifyCode(user.getEmail(), EmailType.SET_PASSWORD, req.getVerifyCode());
+        checkVerifyCode(user.getEmail(), EmailType.SET_PASSWORD, req.getEmailCode());
         // 更新密码
         updatePassword(user, req.getPassword());
     }

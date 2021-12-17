@@ -22,7 +22,7 @@ public class SetPwdReq implements Serializable {
      * 验证码
      */
     @Valid(required = true, length = 6)
-    private String verifyCode;
+    private String emailCode;
 
     /**
      * 密码

@@ -25,9 +25,10 @@
             a.enable,
             a.create_time AS createTime,
             a.update_time AS updateTime
-        FROM user_account a, symbol_config b
-        WHERE b.symbol = CONCAT(a.currency, 'USDT')
-        AND a.uid = #{uid}
+        FROM user_account a
+        LEFT JOIN symbol_config b
+        ON b.symbol = CONCAT(a.currency, 'USDT')
+        WHERE a.uid = #{uid}
         ORDER BY b.sort
     </select>
 
