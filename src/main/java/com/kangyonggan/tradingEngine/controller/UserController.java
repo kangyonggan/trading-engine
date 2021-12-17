@@ -154,8 +154,8 @@ public class UserController extends BaseController {
      * @param req
      * @return
      */
-    @GetMapping("account")
-    public Result<Page<UserAccountLog>> accountLogs(AccountLogReq<UserAccountLog> req) {
+    @GetMapping("accountLog")
+    public Result<Page<UserAccountLog>> accountLog(AccountLogReq<UserAccountLog> req) {
         req.setUid(currentUid());
         return Result.getSuccess(userAccountLogService.getAccountLogs(req));
     }
