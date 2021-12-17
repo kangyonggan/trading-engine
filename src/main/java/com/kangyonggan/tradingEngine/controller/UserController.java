@@ -51,7 +51,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @GetMapping("logout")
+    @DeleteMapping("logout")
     public Result<Void> logout() {
         User user = currentUser();
         if (user == null) {

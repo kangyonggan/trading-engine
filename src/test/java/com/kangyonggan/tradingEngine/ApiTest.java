@@ -22,7 +22,7 @@ public class ApiTest extends AbstractTest {
     @Autowired
     private IPermissionService permissionService;
 
-    private final static String API_KEY = "db05df4e4daf7555191dcb8c66c11cf714bc296ef2ad6d25215395eb06897435";
+    private final static String API_KEY = "f83b130ae177c6ea0f3c132100323aa56d699e9503198d7290b5bc1dadf7b07c";
 
     @Test
     public void allOrders() {
