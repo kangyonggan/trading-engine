@@ -26,7 +26,7 @@ public class SetPwdReq implements Serializable {
     /**
      * 密码
      */
-    @Valid(required = true, minLength = 5, maxLength = 20)
+    @Valid(required = true, minLength = 5)
     private String password;
 
 }
