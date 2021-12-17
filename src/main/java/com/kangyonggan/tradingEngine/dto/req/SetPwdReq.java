@@ -1,6 +1,5 @@
 package com.kangyonggan.tradingEngine.dto.req;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kangyonggan.tradingEngine.annotation.Valid;
 import lombok.Data;
 
@@ -28,7 +27,6 @@ public class SetPwdReq implements Serializable {
      * 密码
      */
     @Valid(required = true, minLength = 5, maxLength = 20)
-    @JsonIgnore
     private String password;
 
 }
