@@ -49,7 +49,7 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     private IOrderService orderService;
 
     @Override
-    public void frozenAmount(Order order) {
+    public boolean frozenAmount(Order order) {
         SymbolConfig symbolConfig = symbolConfigService.getSymbolConfig(order.getSymbol());
         boolean isBuy = order.getSide().equals(OrderSide.BUY.name());
         BigDecimal amount = isBuy ? order.getQuantity().multiply(order.getPrice()) : order.getQuantity();
@@ -58,7 +58,14 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         UserAccount userAccount = getUserAccount(order.getUid(), AccountType.SPOT.name(), currency);
 
         userAccount.setFrozenAmount(userAccount.getFrozenAmount().add(amount).add(fee));
+
+        // 余额不足以冻结
+        if (userAccount.getFrozenAmount().compareTo(userAccount.getTotalAmount()) > 0) {
+            return false;
+        }
+
         baseMapper.updateById(userAccount);
+        return true;
     }
 
     @Override

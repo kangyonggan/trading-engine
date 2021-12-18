@@ -23,8 +23,9 @@ public interface IUserAccountService extends IService<UserAccount> {
      * 冻结资产
      *
      * @param order
+     * @param
      */
-    void frozenAmount(Order order);
+    boolean frozenAmount(Order order);
 
     /**
      * 释放冻结的资产

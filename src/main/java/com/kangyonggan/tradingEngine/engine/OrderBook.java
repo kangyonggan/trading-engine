@@ -46,12 +46,12 @@ public class OrderBook {
     public void init() {
         List<Order> buyAllOrders = orderService.getBuyOrders();
         for (Order order : buyAllOrders) {
-            saveOrder(order);
+            saveOrderToOrderBook(order);
         }
 
         List<Order> sellAllOrders = orderService.getSellOrders();
         for (Order order : sellAllOrders) {
-            saveOrder(order);
+            saveOrderToOrderBook(order);
         }
     }
 
@@ -84,9 +84,17 @@ public class OrderBook {
      */
     @Transactional(rollbackFor = Exception.class)
     public void saveOrder(Order order) {
-        userAccountService.frozenAmount(order);
+        if (!userAccountService.frozenAmount(order)) {
+            order.setStatus(OrderStatus.PARTIALLY_FILLED.name());
+            orderService.updateOrder(order);
+            return;
+        }
         orderService.updateOrder(order);
 
+        saveOrderToOrderBook(order);
+    }
+
+    private void saveOrderToOrderBook(Order order) {
         List<Order> orders;
         boolean isBuy = order.getSide().equals(OrderSide.BUY.name());
         if (isBuy) {
@@ -138,7 +146,7 @@ public class OrderBook {
                     break;
                 } else {
                     // 部分成交
-                    order.setStatus(OrderStatus.PARTIALLY_FILLED.name());
+                    order.setStatus(OrderStatus.NEW.name());
                     orders.get(i).setTradeQuantity(order.getTradeQuantity());
                     orderService.updateOrder(order);
                 }

@@ -202,7 +202,7 @@ public class TradingEngine {
 
             // 更新订单
             order.setTradeQuantity(order.getQuantity().subtract(freeQuantity));
-            OrderStatus status = OrderStatus.PARTIALLY_FILLED;
+            OrderStatus status = OrderStatus.NEW;
             if (freeQuantity.compareTo(BigDecimal.ZERO) == 0) {
                 status = OrderStatus.FILLED;
             } else if (freeQuantity.compareTo(order.getQuantity()) == 0) {
@@ -258,7 +258,7 @@ public class TradingEngine {
 
             // 更新订单
             order.setTradeQuantity(order.getQuantity().subtract(freeQuantity));
-            OrderStatus status = OrderStatus.PARTIALLY_FILLED;
+            OrderStatus status = OrderStatus.NEW;
             if (freeQuantity.compareTo(BigDecimal.ZERO) == 0) {
                 status = OrderStatus.FILLED;
             } else if (freeQuantity.compareTo(order.getQuantity()) == 0) {

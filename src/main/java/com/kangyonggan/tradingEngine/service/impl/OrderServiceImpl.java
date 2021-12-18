@@ -56,14 +56,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public List<Order> getBuyOrders() {
         QueryWrapper<Order> qw = new QueryWrapper<>();
-        qw.eq("side", OrderSide.BUY.name()).eq("type", OrderType.LIMIT.name()).in("status", Arrays.asList(OrderStatus.NEW.name(), OrderStatus.PARTIALLY_FILLED.name()));
+        qw.eq("side", OrderSide.BUY.name()).eq("type", OrderType.LIMIT.name()).eq("status", OrderStatus.NEW.name());
         return baseMapper.selectList(qw);
     }
 
     @Override
     public List<Order> getSellOrders() {
         QueryWrapper<Order> qw = new QueryWrapper<>();
-        qw.eq("side", OrderSide.SELL.name()).eq("type", OrderType.LIMIT.name()).in("status", Arrays.asList(OrderStatus.NEW.name(), OrderStatus.PARTIALLY_FILLED.name()));
+        qw.eq("side", OrderSide.SELL.name()).eq("type", OrderType.LIMIT.name()).eq("status", OrderStatus.NEW.name());
         return baseMapper.selectList(qw);
     }
 
@@ -94,7 +94,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         qw.eq("uid", req.getUid());
         qw.eq("type", OrderType.LIMIT.name());
         qw.eq("symbol", req.getSymbol().name());
-        qw.in("status", Arrays.asList(OrderStatus.NEW.name(), OrderStatus.PARTIALLY_FILLED.name()));
+        qw.eq("status", OrderStatus.NEW.name());
         qw.orderByDesc("id");
         return baseMapper.selectList(qw);
     }
