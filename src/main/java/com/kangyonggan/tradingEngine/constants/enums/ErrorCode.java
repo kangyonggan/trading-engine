@@ -56,6 +56,10 @@ public enum ErrorCode {
      * API数量已达上限
      */
     USER_API_MAX("2006"),
+    /**
+     * 谷歌验证码错误
+     */
+    GOOGLE_SECRET_ERROR("2007"),
 
     /**
      * 订单重复
@@ -66,11 +70,6 @@ public enum ErrorCode {
      * 订单不存在
      */
     ORDER_NOT_EXISTS("1001"),
-
-    /**
-     * 账户余额不足
-     */
-    BALANCE_LITTLE("1002"),
 
     ;
     /**

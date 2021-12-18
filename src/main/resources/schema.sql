@@ -212,6 +212,34 @@ CREATE TABLE user_account_log
     COMMENT '用户账户日志表';
 
 -- ----------------------------
+--  Table structure for user_secret
+-- ----------------------------
+DROP TABLE
+    IF EXISTS user_secret;
+
+CREATE TABLE user_secret
+(
+    id          BIGINT(20) PRIMARY KEY AUTO_INCREMENT NOT NULL
+        COMMENT 'ID',
+    uid         VARCHAR(8)                            NOT NULL
+        COMMENT 'UID',
+    type        VARCHAR(20)                           NOT NULL
+        COMMENT '类型',
+    pri_key     VARCHAR(256)                          NOT NULL DEFAULT ''
+        COMMENT '私钥',
+    pub_key     VARCHAR(256)                          NOT NULL DEFAULT ''
+        COMMENT '公钥',
+    enable      TINYINT                               NOT NULL DEFAULT 1
+        COMMENT '是否可用',
+    create_time TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP
+        COMMENT '创建时间',
+    update_time TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        COMMENT '更新时间',
+    UNIQUE KEY (pub_key)
+)
+    COMMENT '用户密钥表';
+
+-- ----------------------------
 --  Table structure for permission
 -- ----------------------------
 DROP TABLE

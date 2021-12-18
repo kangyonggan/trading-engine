@@ -16,8 +16,13 @@ public enum EmailType {
     SET_PASSWORD,
 
     /**
-     * 创建API
+     * API管理
      */
     API,
+
+    /**
+     * 谷歌认证
+     */
+    GOOGLE_SECRET,
 
 }

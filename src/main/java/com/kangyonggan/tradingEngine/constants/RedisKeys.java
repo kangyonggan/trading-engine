@@ -15,4 +15,8 @@ public interface RedisKeys {
      */
     String TOKEN = "TOKENS:";
 
+    /**
+     * 谷歌认证密钥
+     */
+    String GOOGLE_SECRET = "GOOGLE_SECRET:";
 }

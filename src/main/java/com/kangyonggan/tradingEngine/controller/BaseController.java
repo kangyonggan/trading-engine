@@ -3,6 +3,7 @@ package com.kangyonggan.tradingEngine.controller;
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.components.MessageHandler;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
+import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.res.Result;
 import com.kangyonggan.tradingEngine.entity.Permission;
 import com.kangyonggan.tradingEngine.entity.User;
@@ -65,7 +66,7 @@ public class BaseController {
      *
      * @return
      */
-    protected User currentUser() {
+    protected UserDto currentUser() {
         String token = request.getHeader(AppConstants.HEADER_TOKEN);
         if (StringUtils.isEmpty(token)) {
             return null;

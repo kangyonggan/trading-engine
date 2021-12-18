@@ -7,6 +7,7 @@ import com.kangyonggan.tradingEngine.components.MessageHandler;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.dto.RequestParams;
+import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.res.Result;
 import com.kangyonggan.tradingEngine.entity.Permission;
 import com.kangyonggan.tradingEngine.entity.User;
@@ -118,7 +119,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
      * @throws IOException
      */
     private boolean isLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        User user = userService.getUserInfoByToken(request.getHeader(AppConstants.HEADER_TOKEN));
+        UserDto user = userService.getUserInfoByToken(request.getHeader(AppConstants.HEADER_TOKEN));
         if (user == null) {
             writeResponse(response, ErrorCode.USER_AUTHORIZATION_FAILURE);
             return false;

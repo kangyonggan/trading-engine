@@ -3,15 +3,16 @@ package com.kangyonggan.tradingEngine.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
+import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.AccountRes;
 import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.dto.res.Result;
-import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.entity.UserAccountLog;
 import com.kangyonggan.tradingEngine.service.IPermissionService;
 import com.kangyonggan.tradingEngine.service.IUserAccountLogService;
 import com.kangyonggan.tradingEngine.service.IUserAccountService;
+import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,9 @@ public class UserController extends BaseController {
     @Autowired
     private IUserAccountLogService userAccountLogService;
 
+    @Autowired
+    private IUserSecretService userSecretService;
+
     /**
      * 登录
      *
@@ -42,7 +46,7 @@ public class UserController extends BaseController {
      */
     @PostMapping("login")
     @AnonymousAccess
-    public Result<User> login(@RequestBody UserLoginReq req) {
+    public Result<UserDto> login(@RequestBody UserLoginReq req) {
         return Result.getSuccess(userService.login(req));
     }
 
@@ -53,7 +57,7 @@ public class UserController extends BaseController {
      */
     @DeleteMapping("logout")
     public Result<Void> logout() {
-        User user = currentUser();
+        UserDto user = currentUser();
         if (user == null) {
             return Result.getSuccess();
         }
@@ -158,6 +162,30 @@ public class UserController extends BaseController {
     public Result<Page<UserAccountLog>> accountLog(AccountLogReq<UserAccountLog> req) {
         req.setUid(currentUid());
         return Result.getSuccess(userAccountLogService.getAccountLogs(req));
+    }
+
+    /**
+     * 获取谷歌认证密钥
+     *
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("googleSecret")
+    public Result<String> getGoogleSecret() throws Exception {
+        return Result.getSuccess(userSecretService.getGoogleSecret(currentUid()));
+    }
+
+    /**
+     * 保存谷歌认证密钥
+     *
+     * @param req
+     * @return
+     */
+    @PostMapping("googleSecret")
+    public Result<Void> saveGoogleSecret(@RequestBody GoogleReq req) {
+        req.setUid(currentUid());
+        userSecretService.saveGoogleSecret(req);
+        return Result.getSuccess();
     }
 
 }

@@ -2,24 +2,22 @@ package com.kangyonggan.tradingEngine.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * <p>
- * 用户表
+ * 用户密钥表
  * </p>
  *
  * @author mbg
- * @since 2021-12-14
+ * @since 2021-12-18
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class User implements Serializable {
+public class UserSecret implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,21 +33,19 @@ public class User implements Serializable {
     private String uid;
 
     /**
-     * 邮箱
+     * 类型
      */
-    private String email;
+    private String type;
 
     /**
-     * 密码
+     * 私钥
      */
-    @JsonIgnore
-    private String password;
+    private String priKey;
 
     /**
-     * 密码盐
+     * 公钥
      */
-    @JsonIgnore
-    private String salt;
+    private String pubKey;
 
     /**
      * 是否可用
@@ -65,5 +61,6 @@ public class User implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
 
 }

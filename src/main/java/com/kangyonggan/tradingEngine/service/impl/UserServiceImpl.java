@@ -13,6 +13,7 @@ import com.kangyonggan.tradingEngine.constants.enums.EmailCheckStatus;
 import com.kangyonggan.tradingEngine.constants.enums.EmailType;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.LoginType;
+import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
 import com.kangyonggan.tradingEngine.dto.req.SetPwdReq;
 import com.kangyonggan.tradingEngine.dto.req.UserLoginReq;
@@ -20,12 +21,14 @@ import com.kangyonggan.tradingEngine.dto.req.UserLogoutReq;
 import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.mapper.UserMapper;
 import com.kangyonggan.tradingEngine.service.IEmailService;
+import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import com.kangyonggan.tradingEngine.util.Digests;
 import com.kangyonggan.tradingEngine.util.Encodes;
 import com.kangyonggan.tradingEngine.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,10 +57,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Value("${spring.profiles.active}")
     private String env;
 
+    @Autowired
+    private IUserSecretService userSecretService;
+
     @Override
     @Valid
     @Transactional(rollbackFor = Exception.class)
-    public User login(UserLoginReq req) {
+    public UserDto login(UserLoginReq req) {
         User user = getUserByEmail(req.getEmail());
         if (LoginType.BY_CODE.equals(req.getLoginType())) {
             checkVerifyCode(req.getEmail(), EmailType.LOGIN, req.getVerifyCode());
@@ -84,15 +90,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BizException(ErrorCode.PARAMS_ERROR);
         }
 
-        // token
-        user.setToken(getToken());
-        redisManager.set(RedisKeys.TOKEN + user.getToken(), user, AppConstants.TOKEN_EXPIRE_TIME);
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(user, userDto);
 
-        return user;
+        // 谷歌认证
+        userDto.setGoogleVerify(userSecretService.hasGoogleVerify(user.getUid()));
+
+        // token
+        userDto.setToken(getToken());
+        redisManager.set(RedisKeys.TOKEN + userDto.getToken(), userDto, AppConstants.TOKEN_EXPIRE_TIME);
+
+        return userDto;
     }
 
     @Override
-    public User getUserInfoByToken(String token) {
+    public UserDto getUserInfoByToken(String token) {
         if (StringUtils.isEmpty(token)) {
             return null;
         }
