@@ -18,6 +18,6 @@ public class PermissionReq implements Serializable {
 
     private String whiteList;
 
-    private String emailCode;
+    private Long googleCode;
 
 }

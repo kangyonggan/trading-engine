@@ -15,13 +15,13 @@ import com.kangyonggan.tradingEngine.entity.UserSecret;
 public interface IUserSecretService extends IService<UserSecret> {
 
     /**
-     * 获取谷歌认证密钥
+     * 生成谷歌认证密钥
      *
      * @param uid
      * @return
      * @throws Exception
      */
-    String getGoogleSecret(String uid) throws Exception;
+    String generateGoogleSecret(String uid) throws Exception;
 
     /**
      * 保存谷歌认证密钥
@@ -37,5 +37,13 @@ public interface IUserSecretService extends IService<UserSecret> {
      * @return
      */
     Boolean hasGoogleVerify(String uid);
+
+    /**
+     * 获取用户的谷歌认证密钥
+     *
+     * @param uid
+     * @return
+     */
+    String getGoogleSecret(String uid);
 
 }

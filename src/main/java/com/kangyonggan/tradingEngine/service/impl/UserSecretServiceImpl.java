@@ -45,7 +45,7 @@ public class UserSecretServiceImpl extends ServiceImpl<UserSecretMapper, UserSec
     private IUserService userService;
 
     @Override
-    public String getGoogleSecret(String uid) throws Exception {
+    public String generateGoogleSecret(String uid) throws Exception {
         String secretKey = GoogleAuthenticator.generateSecretKey();
         redisManager.set(RedisKeys.GOOGLE_SECRET + uid, secretKey, 3600);
         return secretKey;
@@ -83,6 +83,15 @@ public class UserSecretServiceImpl extends ServiceImpl<UserSecretMapper, UserSec
         QueryWrapper<UserSecret> qw = new QueryWrapper<>();
         qw.eq("uid", uid).eq("type", UserSecretType.GOOGLE.name()).eq("enable", Enable.YES.getValue());
         return baseMapper.selectCount(qw) > 0;
+    }
+
+    @Override
+    public String getGoogleSecret(String uid) {
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("uid", uid).eq("type", UserSecretType.GOOGLE.name()).eq("enable", Enable.YES.getValue());
+
+        UserSecret userSecret = baseMapper.selectOne(qw);
+        return userSecret == null ? null : userSecret.getPriKey();
     }
 
     /**

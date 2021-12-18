@@ -3,20 +3,17 @@ package com.kangyonggan.tradingEngine.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.components.BizException;
-import com.kangyonggan.tradingEngine.constants.AppConstants;
-import com.kangyonggan.tradingEngine.constants.enums.EmailCheckStatus;
-import com.kangyonggan.tradingEngine.constants.enums.EmailType;
 import com.kangyonggan.tradingEngine.constants.enums.Enable;
 import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
-import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
 import com.kangyonggan.tradingEngine.dto.req.PermissionReq;
 import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.entity.Permission;
-import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.mapper.PermissionMapper;
-import com.kangyonggan.tradingEngine.service.IEmailService;
 import com.kangyonggan.tradingEngine.service.IPermissionService;
+import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import com.kangyonggan.tradingEngine.service.IUserService;
+import com.kangyonggan.tradingEngine.util.GoogleAuthenticator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +36,7 @@ import java.util.List;
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements IPermissionService {
 
     @Autowired
-    private IEmailService emailService;
+    private IUserSecretService userSecretService;
 
     @Autowired
     private IUserService userService;
@@ -67,8 +64,10 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public PermissionRes savePermission(PermissionReq req) {
-        User user = userService.getUserByUid(req.getUid());
-        checkVerifyCode(user.getEmail(), EmailType.API, req.getEmailCode());
+        String secret = userSecretService.getGoogleSecret(req.getUid());
+        if (StringUtils.isEmpty(secret) || !GoogleAuthenticator.checkCode(secret, req.getGoogleCode(), System.currentTimeMillis())) {
+            throw new BizException(ErrorCode.GOOGLE_SECRET_ERROR);
+        }
 
         QueryWrapper<Permission> qw = new QueryWrapper<>();
         qw.eq("uid", req.getUid()).eq("enable", Enable.YES.getValue());
@@ -89,9 +88,11 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public PermissionRes getPermission(Long id, String emailCode, String uid) {
-        User user = userService.getUserByUid(uid);
-        checkVerifyCode(user.getEmail(), EmailType.API, emailCode);
+    public PermissionRes getPermission(Long id, Long googleCode, String uid) {
+        String secret = userSecretService.getGoogleSecret(uid);
+        if (StringUtils.isEmpty(secret) || !GoogleAuthenticator.checkCode(secret, googleCode, System.currentTimeMillis())) {
+            throw new BizException(ErrorCode.GOOGLE_SECRET_ERROR);
+        }
 
         QueryWrapper<Permission> qw = new QueryWrapper<>();
         qw.eq("id", id).eq("uid", uid).eq("enable", Enable.YES.getValue());
@@ -155,29 +156,5 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         return DatatypeConverter.printHexBinary(bytes).toLowerCase();
-    }
-
-    /**
-     * 校验邮箱验证码
-     *
-     * @param email
-     * @param emailType
-     * @param verifyCode
-     */
-    private void checkVerifyCode(String email, EmailType emailType, String verifyCode) {
-        // dev环境不校验验证码
-        if (AppConstants.ENV_DEV.equals(env)) {
-            return;
-        }
-        CheckEmailCodeReq req = new CheckEmailCodeReq();
-        req.setType(emailType);
-        req.setEmail(email);
-        req.setVerifyCode(verifyCode);
-        EmailCheckStatus checkStatus = emailService.checkEmailCode(req);
-        if (checkStatus.equals(EmailCheckStatus.FAILURE)) {
-            throw new BizException(ErrorCode.USER_VERIFY_CODE_ERROR);
-        } else if (checkStatus.equals(EmailCheckStatus.INVALID)) {
-            throw new BizException(ErrorCode.USER_VERIFY_CODE_INVALID);
-        }
     }
 }

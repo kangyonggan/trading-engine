@@ -36,11 +36,11 @@ public interface IPermissionService extends IService<Permission> {
      * 查看权限
      *
      * @param id
-     * @param emailCode
+     * @param googleCode
      * @param uid
      * @return
      */
-    PermissionRes getPermission(Long id, String emailCode, String uid);
+    PermissionRes getPermission(Long id, Long googleCode, String uid);
 
     /**
      * 修改权限

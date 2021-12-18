@@ -122,12 +122,12 @@ public class UserController extends BaseController {
      * 查看权限
      *
      * @param id
-     * @param emailCode
+     * @param googleCode
      * @return
      */
     @GetMapping("permission/{id:[\\d+]}")
-    public Result<PermissionRes> getPermission(@PathVariable Long id, @RequestParam String emailCode) {
-        return Result.getSuccess(permissionService.getPermission(id, emailCode, currentUid()));
+    public Result<PermissionRes> getPermission(@PathVariable Long id, @RequestParam Long googleCode) {
+        return Result.getSuccess(permissionService.getPermission(id, googleCode, currentUid()));
     }
 
     /**
@@ -165,14 +165,14 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 获取谷歌认证密钥
+     * 生成谷歌认证密钥
      *
      * @return
      * @throws Exception
      */
     @GetMapping("googleSecret")
-    public Result<String> getGoogleSecret() throws Exception {
-        return Result.getSuccess(userSecretService.getGoogleSecret(currentUid()));
+    public Result<String> generateGoogleSecret() throws Exception {
+        return Result.getSuccess(userSecretService.generateGoogleSecret(currentUid()));
     }
 
     /**
