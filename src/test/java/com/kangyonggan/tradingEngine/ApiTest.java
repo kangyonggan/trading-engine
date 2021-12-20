@@ -22,7 +22,7 @@ public class ApiTest extends AbstractTest {
     @Autowired
     private IUserSecretService userSecretService;
 
-    private final static String API_KEY = "f83b130ae177c6ea0f3c132100323aa56d699e9503198d7290b5bc1dadf7b07c";
+    private final static String API_KEY = "8e17a8b38c3b2126a2bb52c5d17769b3bec1188be55907271146957e8010b235";
 
     @Test
     public void allOrders() {
