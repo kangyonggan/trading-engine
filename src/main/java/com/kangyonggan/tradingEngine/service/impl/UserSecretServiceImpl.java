@@ -10,6 +10,8 @@ import com.kangyonggan.tradingEngine.constants.RedisKeys;
 import com.kangyonggan.tradingEngine.constants.enums.*;
 import com.kangyonggan.tradingEngine.dto.req.CheckEmailCodeReq;
 import com.kangyonggan.tradingEngine.dto.req.GoogleReq;
+import com.kangyonggan.tradingEngine.dto.req.UserSecretReq;
+import com.kangyonggan.tradingEngine.dto.res.UserSecretRes;
 import com.kangyonggan.tradingEngine.entity.User;
 import com.kangyonggan.tradingEngine.entity.UserSecret;
 import com.kangyonggan.tradingEngine.mapper.UserSecretMapper;
@@ -17,9 +19,16 @@ import com.kangyonggan.tradingEngine.service.IEmailService;
 import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import com.kangyonggan.tradingEngine.util.GoogleAuthenticator;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.xml.bind.DatatypeConverter;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -94,6 +103,96 @@ public class UserSecretServiceImpl extends ServiceImpl<UserSecretMapper, UserSec
         return userSecret == null ? null : userSecret.getPriKey();
     }
 
+    @Override
+    public List<UserSecretRes> getApis(String uid) {
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("uid", uid);
+        qw.eq("type", UserSecretType.API.name());
+        qw.eq("enable", Enable.YES.getValue());
+        qw.orderByDesc("id");
+        List<UserSecret> list = baseMapper.selectList(qw);
+        List<UserSecretRes> resList = new ArrayList<>();
+        for (UserSecret userSecret : list) {
+            UserSecretRes res = new UserSecretRes();
+            BeanUtils.copyProperties(userSecret, res);
+            res.setId(String.valueOf(userSecret.getId()));
+            res.setPriKey("********");
+            resList.add(res);
+        }
+        return resList;
+    }
+
+    @Override
+    public UserSecretRes saveApi(UserSecretReq req) {
+        String secret = getGoogleSecret(req.getUid());
+        if (StringUtils.isEmpty(secret) || !GoogleAuthenticator.checkCode(secret, req.getGoogleCode(), System.currentTimeMillis())) {
+            throw new BizException(ErrorCode.GOOGLE_SECRET_ERROR);
+        }
+
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("uid", req.getUid()).eq("type", UserSecretType.API.name()).eq("enable", Enable.YES.getValue());
+        if (baseMapper.selectCount(qw) >= 30) {
+            throw new BizException(ErrorCode.USER_API_MAX);
+        }
+
+        UserSecret userSecret = new UserSecret();
+        userSecret.setUid(req.getUid());
+        userSecret.setRemark(req.getRemark());
+        userSecret.setType(UserSecretType.API.name());
+        userSecret.setPubKey(generateApiKey());
+        userSecret.setPriKey(generateSecretKey());
+        baseMapper.insert(userSecret);
+        UserSecretRes res = new UserSecretRes();
+        BeanUtils.copyProperties(userSecret, res);
+        res.setId(String.valueOf(userSecret.getId()));
+        return res;
+    }
+
+    @Override
+    public void updateApi(UserSecretReq req) {
+        UserSecret userSecret = new UserSecret();
+        userSecret.setId(req.getId());
+        userSecret.setRemark(req.getRemark());
+        baseMapper.updateById(userSecret);
+    }
+
+    @Override
+    public UserSecretRes getApi(Long id, Long googleCode, String uid) {
+        String secret = getGoogleSecret(uid);
+        if (StringUtils.isEmpty(secret) || !GoogleAuthenticator.checkCode(secret, googleCode, System.currentTimeMillis())) {
+            throw new BizException(ErrorCode.GOOGLE_SECRET_ERROR);
+        }
+
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("id", id).eq("type", UserSecretType.API.name()).eq("uid", uid).eq("enable", Enable.YES.getValue());
+        UserSecret userSecret = baseMapper.selectOne(qw);
+        if (userSecret == null) {
+            return null;
+        }
+        UserSecretRes res = new UserSecretRes();
+        BeanUtils.copyProperties(userSecret, res);
+        res.setId(String.valueOf(userSecret.getId()));
+        return res;
+    }
+
+    @Override
+    public void deleteApi(UserSecretReq req) {
+        UserSecret userSecret = new UserSecret();
+        userSecret.setId(req.getId());
+        userSecret.setEnable(Enable.NO.getValue());
+        baseMapper.updateById(userSecret);
+    }
+
+    @Override
+    public UserSecret getApiByApiKey(String apiKey) {
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("pub_key", apiKey);
+        qw.eq("type", UserSecretType.API.name());
+        qw.eq("enable", Enable.YES.getValue());
+
+        return baseMapper.selectOne(qw);
+    }
+
     /**
      * 校验邮箱验证码
      *
@@ -116,5 +215,33 @@ public class UserSecretServiceImpl extends ServiceImpl<UserSecretMapper, UserSec
         } else if (checkStatus.equals(EmailCheckStatus.INVALID)) {
             throw new BizException(ErrorCode.USER_VERIFY_CODE_INVALID);
         }
+    }
+
+    /**
+     * 生成ApiKey
+     *
+     * @return
+     */
+    private String generateApiKey() {
+        String apiKey = generateSecretKey();
+
+        QueryWrapper<UserSecret> qw = new QueryWrapper<>();
+        qw.eq("pub_key", apiKey);
+        if (baseMapper.selectCount(qw) > 0) {
+            return generateApiKey();
+        }
+        return apiKey;
+    }
+
+    /**
+     * 生成SecretKey
+     *
+     * @return
+     */
+    private String generateSecretKey() {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[32];
+        random.nextBytes(bytes);
+        return DatatypeConverter.printHexBinary(bytes).toLowerCase();
     }
 }

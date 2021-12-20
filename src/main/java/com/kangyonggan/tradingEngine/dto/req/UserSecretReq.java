@@ -8,15 +8,13 @@ import java.io.Serializable;
  * @author kyg
  */
 @Data
-public class PermissionReq implements Serializable {
+public class UserSecretReq implements Serializable {
 
     private Long id;
 
     private String uid;
 
     private String remark;
-
-    private String whiteList;
 
     private Long googleCode;
 

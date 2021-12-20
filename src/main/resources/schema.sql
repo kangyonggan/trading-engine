@@ -229,6 +229,8 @@ CREATE TABLE user_secret
         COMMENT '私钥',
     pub_key     VARCHAR(256)                          NOT NULL DEFAULT ''
         COMMENT '公钥',
+    remark      VARCHAR(64)                           NOT NULL DEFAULT ''
+        COMMENT '备注',
     enable      TINYINT                               NOT NULL DEFAULT 1
         COMMENT '是否可用',
     create_time TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -239,33 +241,4 @@ CREATE TABLE user_secret
 )
     COMMENT '用户密钥表';
 
--- ----------------------------
---  Table structure for permission
--- ----------------------------
-DROP TABLE
-    IF EXISTS permission;
-
-CREATE TABLE permission
-(
-    id          BIGINT(20) PRIMARY KEY AUTO_INCREMENT NOT NULL
-        COMMENT 'ID',
-    uid         VARCHAR(8)                            NOT NULL
-        COMMENT 'UID',
-    api_key     VARCHAR(64)                           NOT NULL
-        COMMENT 'ApiKey',
-    secret_key  VARCHAR(128)                          NOT NULL
-        COMMENT 'SecretKey',
-    white_list  VARCHAR(256)                          NOT NULL DEFAULT ''
-        COMMENT '白名单',
-    remark      VARCHAR(64)                           NOT NULL DEFAULT ''
-        COMMENT '备注',
-    enable      TINYINT                               NOT NULL DEFAULT 1
-        COMMENT '是否可用',
-    create_time TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP
-        COMMENT '创建时间',
-    update_time TIMESTAMP                             NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        COMMENT '更新时间',
-    UNIQUE KEY (api_key)
-)
-    COMMENT '权限表';
 

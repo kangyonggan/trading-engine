@@ -6,10 +6,9 @@ import com.kangyonggan.tradingEngine.annotation.ApiVersion;
 import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.AccountRes;
-import com.kangyonggan.tradingEngine.dto.res.PermissionRes;
 import com.kangyonggan.tradingEngine.dto.res.Result;
+import com.kangyonggan.tradingEngine.dto.res.UserSecretRes;
 import com.kangyonggan.tradingEngine.entity.UserAccountLog;
-import com.kangyonggan.tradingEngine.service.IPermissionService;
 import com.kangyonggan.tradingEngine.service.IUserAccountLogService;
 import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import com.kangyonggan.tradingEngine.service.IUserSecretService;
@@ -25,9 +24,6 @@ import java.util.List;
 @RequestMapping("user")
 @ApiVersion(1)
 public class UserController extends BaseController {
-
-    @Autowired
-    private IPermissionService permissionService;
 
     @Autowired
     private IUserAccountService userAccountService;
@@ -88,9 +84,9 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @GetMapping("permission")
-    public Result<List<PermissionRes>> permission() {
-        return Result.getSuccess(permissionService.getPermissionList(currentUid()));
+    @GetMapping("api")
+    public Result<List<UserSecretRes>> getApis() {
+        return Result.getSuccess(userSecretService.getApis(currentUid()));
     }
 
     /**
@@ -99,10 +95,10 @@ public class UserController extends BaseController {
      * @param req
      * @return
      */
-    @PostMapping("permission")
-    public Result<PermissionRes> savePermission(@RequestBody PermissionReq req) {
+    @PostMapping("api")
+    public Result<UserSecretRes> saveApi(@RequestBody UserSecretReq req) {
         req.setUid(currentUid());
-        return Result.getSuccess(permissionService.savePermission(req));
+        return Result.getSuccess(userSecretService.saveApi(req));
     }
 
     /**
@@ -111,10 +107,10 @@ public class UserController extends BaseController {
      * @param req
      * @return
      */
-    @PutMapping("permission")
-    public Result<Void> updatePermission(@RequestBody PermissionReq req) {
+    @PutMapping("api")
+    public Result<Void> updateApi(@RequestBody UserSecretReq req) {
         req.setUid(currentUid());
-        permissionService.updatePermission(req);
+        userSecretService.updateApi(req);
         return Result.getSuccess();
     }
 
@@ -125,9 +121,9 @@ public class UserController extends BaseController {
      * @param googleCode
      * @return
      */
-    @GetMapping("permission/{id:[\\d+]}")
-    public Result<PermissionRes> getPermission(@PathVariable Long id, @RequestParam Long googleCode) {
-        return Result.getSuccess(permissionService.getPermission(id, googleCode, currentUid()));
+    @GetMapping("api/{id}")
+    public Result<UserSecretRes> getPermission(@PathVariable Long id, @RequestParam Long googleCode) {
+        return Result.getSuccess(userSecretService.getApi(id, googleCode, currentUid()));
     }
 
     /**
@@ -135,10 +131,10 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @DeleteMapping("permission")
-    public Result<Void> deletePermission(PermissionReq req) {
+    @DeleteMapping("api")
+    public Result<Void> deleteApi(UserSecretReq req) {
         req.setUid(currentUid());
-        permissionService.deletePermission(req);
+        userSecretService.deleteApi(req);
         return Result.getSuccess();
     }
 

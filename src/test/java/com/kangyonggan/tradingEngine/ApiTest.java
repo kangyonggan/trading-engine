@@ -4,8 +4,8 @@ import com.kangyonggan.tradingEngine.components.ApiSignature;
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.dto.RequestParams;
-import com.kangyonggan.tradingEngine.entity.Permission;
-import com.kangyonggan.tradingEngine.service.IPermissionService;
+import com.kangyonggan.tradingEngine.entity.UserSecret;
+import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -20,17 +20,17 @@ public class ApiTest extends AbstractTest {
     private ApiSignature apiSignature;
 
     @Autowired
-    private IPermissionService permissionService;
+    private IUserSecretService userSecretService;
 
     private final static String API_KEY = "f83b130ae177c6ea0f3c132100323aa56d699e9503198d7290b5bc1dadf7b07c";
 
     @Test
     public void allOrders() {
-        Permission permission = permissionService.getPermissionByApiKey(API_KEY);
+        UserSecret userSecret = userSecretService.getApiByApiKey(API_KEY);
         RequestParams<String, Object> params = new RequestParams<>();
         params.put("symbol", "BTCUSDT");
         params.put("orderId", 0);
-        LOGGER.info("请求Api接口：{}", request("http://localhost:8080/v1/order/allOrders", "GET", params, permission.getApiKey(), permission.getSecretKey()));
+        LOGGER.info("请求Api接口：{}", request("http://localhost:8080/v1/order/allOrders", "GET", params, userSecret.getPubKey(), userSecret.getPriKey()));
     }
 
     /**

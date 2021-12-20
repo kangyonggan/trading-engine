@@ -2,7 +2,11 @@ package com.kangyonggan.tradingEngine.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kangyonggan.tradingEngine.dto.req.GoogleReq;
+import com.kangyonggan.tradingEngine.dto.req.UserSecretReq;
+import com.kangyonggan.tradingEngine.dto.res.UserSecretRes;
 import com.kangyonggan.tradingEngine.entity.UserSecret;
+
+import java.util.List;
 
 /**
  * <p>
@@ -46,4 +50,51 @@ public interface IUserSecretService extends IService<UserSecret> {
      */
     String getGoogleSecret(String uid);
 
+    /**
+     * 查询权限列表
+     *
+     * @param uid
+     * @return
+     */
+    List<UserSecretRes> getApis(String uid);
+
+    /**
+     * 添加权限
+     *
+     * @param req
+     * @return
+     */
+    UserSecretRes saveApi(UserSecretReq req);
+
+    /**
+     * 修改权限
+     *
+     * @param req
+     */
+    void updateApi(UserSecretReq req);
+
+    /**
+     * 查看权限
+     *
+     * @param id
+     * @param googleCode
+     * @param uid
+     * @return
+     */
+    UserSecretRes getApi(Long id, Long googleCode, String uid);
+
+    /**
+     * 删除权限
+     *
+     * @param req
+     */
+    void deleteApi(UserSecretReq req);
+
+    /**
+     * 根据apiKey查询用户api
+     *
+     * @param apiKey
+     * @return
+     */
+    UserSecret getApiByApiKey(String apiKey);
 }

@@ -9,9 +9,8 @@ import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.dto.RequestParams;
 import com.kangyonggan.tradingEngine.dto.UserDto;
 import com.kangyonggan.tradingEngine.dto.res.Result;
-import com.kangyonggan.tradingEngine.entity.Permission;
-import com.kangyonggan.tradingEngine.entity.User;
-import com.kangyonggan.tradingEngine.service.IPermissionService;
+import com.kangyonggan.tradingEngine.entity.UserSecret;
+import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import com.kangyonggan.tradingEngine.util.Jackson2Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     private MessageHandler messageHandler;
 
     @Autowired
-    private IPermissionService permissionService;
+    private IUserSecretService userSecretService;
 
     @Autowired
     private ApiSignature apiSignature;
@@ -77,19 +76,18 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         ApiAccess apiAccess = handlerMethod.getMethodAnnotation(ApiAccess.class);
         if (apiAccess != null) {
             String apiKey = request.getHeader(AppConstants.HEADER_APIKEY);
-            Permission permission = permissionService.getPermissionByApiKey(apiKey);
-            if (permission == null) {
+            UserSecret userSecret = userSecretService.getApiByApiKey(apiKey);
+            if (userSecret == null) {
                 return false;
             }
             // 验签
-            return apiSignature.verify(getParams(request), permission.getSecretKey());
+            return apiSignature.verify(getParams(request), userSecret.getPriKey());
         }
         return true;
     }
 
     /**
      * 校验登录注解
-     *
      *
      * @param request
      * @param response
@@ -111,7 +109,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
     /**
      * 判断是否登录
-     *
      *
      * @param request
      * @param response

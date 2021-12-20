@@ -5,6 +5,7 @@ package com.kangyonggan.tradingEngine.constants.enums;
  */
 public enum UserSecretType {
 
-    GOOGLE
+    API,
+    GOOGLE,
 
 }

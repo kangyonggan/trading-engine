@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * @author kyg
  */
 @Data
-public class PermissionRes implements Serializable {
+public class UserSecretRes implements Serializable {
 
     /**
      * ID
@@ -24,17 +24,12 @@ public class PermissionRes implements Serializable {
     /**
      * ApiKey
      */
-    private String apiKey;
+    private String pubKey;
 
     /**
      * SecretKey
      */
-    private String secretKey;
-
-    /**
-     * 白名单
-     */
-    private String whiteList;
+    private String priKey;
 
     /**
      * 备注

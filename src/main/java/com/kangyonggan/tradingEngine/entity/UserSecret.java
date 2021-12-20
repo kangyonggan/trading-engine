@@ -48,6 +48,11 @@ public class UserSecret implements Serializable {
     private String pubKey;
 
     /**
+     * 备注
+     */
+    private String remark;
+
+    /**
      * 是否可用
      */
     private Integer enable;
