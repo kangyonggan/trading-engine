@@ -1,0 +1,4 @@
+## 下单
+GET {{app_host}}/v1/order?clientOrderNo=123123123123
+Content-Type: application/json
+APIKEY: {{api_key}}

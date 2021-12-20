@@ -4,11 +4,11 @@ import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
 import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
-import com.kangyonggan.tradingEngine.dto.res.CreateOrderRes;
-import com.kangyonggan.tradingEngine.dto.res.Result;
-import com.kangyonggan.tradingEngine.dto.res.SymbolRes;
+import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
+import com.kangyonggan.tradingEngine.dto.res.*;
 import com.kangyonggan.tradingEngine.engine.TradingEngine;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
+import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +27,9 @@ public class ApiController extends BaseController {
 
     @Autowired
     private TradingEngine tradingEngine;
+
+    @Autowired
+    private IUserAccountService userAccountService;
 
     /**
      * 测试服务器连通性
@@ -62,6 +65,17 @@ public class ApiController extends BaseController {
     }
 
     /**
+     * 账户信息
+     *
+     * @return
+     */
+    @GetMapping("account")
+    @ApiAccess
+    public Result<List<AccountRes>> account() {
+        return Result.getSuccess(userAccountService.getAccounts(currentApiUid()));
+    }
+
+    /**
      * 下单
      *
      * @param req
@@ -72,5 +86,18 @@ public class ApiController extends BaseController {
     public Result<CreateOrderRes> createOrder(@RequestBody CreateOrderReq req) {
         req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.createOrder(req));
+    }
+
+    /**
+     * 订单查询
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("order")
+    @ApiAccess
+    public Result<OrderRes> getOrder(GetOrderReq req) {
+        req.setUid(currentApiUid());
+        return Result.getSuccess(tradingEngine.getOrder(req));
     }
 }

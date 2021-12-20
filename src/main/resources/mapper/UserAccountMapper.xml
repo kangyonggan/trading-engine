@@ -18,6 +18,7 @@
     <select id="selectAccount" resultType="com.kangyonggan.tradingEngine.dto.res.AccountRes">
         SELECT
             a.id,
+            a.uid,
             a.account_type AS accountType,
             a.currency,
             a.total_amount AS totalAmount,
