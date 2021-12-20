@@ -1,7 +1,10 @@
 package com.kangyonggan.tradingEngine.service;
 
+import com.kangyonggan.tradingEngine.dto.res.SymbolRes;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,4 +24,17 @@ public interface ISymbolConfigService extends IService<SymbolConfig> {
      */
     SymbolConfig getSymbolConfig(String symbol);
 
+    /**
+     * 获取交易对
+     *
+     * @return
+     */
+    List<SymbolConfig> getAllSymbolConfigs();
+
+    /**
+     * 获取交易对 - 包含最新价格涨跌幅
+     *
+     * @return
+     */
+    List<SymbolRes> getSymbolList();
 }

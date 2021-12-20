@@ -34,4 +34,12 @@ public interface ITradeService extends IService<Trade> {
      * @param status
      */
     void updateTradeStatus(long id, TradeStatus status);
+
+    /**
+     * 获取交易对的最新价
+     *
+     * @param symbol
+     * @return
+     */
+    BigDecimal getPrice(String symbol);
 }

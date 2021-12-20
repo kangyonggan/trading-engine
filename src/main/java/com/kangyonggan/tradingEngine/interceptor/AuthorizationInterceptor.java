@@ -14,6 +14,7 @@ import com.kangyonggan.tradingEngine.service.IUserSecretService;
 import com.kangyonggan.tradingEngine.service.IUserService;
 import com.kangyonggan.tradingEngine.util.Jackson2Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -31,6 +32,9 @@ import java.util.Map;
  */
 @Component
 public class AuthorizationInterceptor implements HandlerInterceptor {
+
+    @Value("${spring.profiles.active}")
+    private String env;
 
     @Autowired
     private IUserService userService;
@@ -50,7 +54,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
 
             // Api访问权限注解
-            if (!validApi(request, response, handlerMethod)) {
+            if (!validApi(request, handlerMethod)) {
                 return false;
             }
 
@@ -68,17 +72,20 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
      * Api访问权限注解
      *
      * @param request
-     * @param response
      * @param handlerMethod
      * @return
      */
-    private boolean validApi(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
+    private boolean validApi(HttpServletRequest request, HandlerMethod handlerMethod) {
         ApiAccess apiAccess = handlerMethod.getMethodAnnotation(ApiAccess.class);
         if (apiAccess != null) {
             String apiKey = request.getHeader(AppConstants.HEADER_APIKEY);
             UserSecret userSecret = userSecretService.getApiByApiKey(apiKey);
             if (userSecret == null) {
                 return false;
+            }
+            // dev环境不验签
+            if (AppConstants.ENV_DEV.equals(env)) {
+                return true;
             }
             // 验签
             return apiSignature.verify(getParams(request), userSecret.getPriKey());

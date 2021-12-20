@@ -1,0 +1,13 @@
+## 下单
+POST {{app_host}}/v1/order
+Content-Type: application/json
+APIKEY: {{api_key}}
+
+{
+  "symbol": "BTCUSDT",
+  "clientOrderNo": "123123123123",
+  "side": "BUY",
+  "type": "LIMIT",
+  "price": 50000,
+  "quantity": 0.01
+}

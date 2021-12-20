@@ -25,19 +25,6 @@ public class OrderController extends BaseController {
     private TradingEngine tradingEngine;
 
     /**
-     * 下单
-     *
-     * @param req
-     * @return
-     */
-    @PostMapping
-    @ApiAccess
-    public Result<CreateOrderRes> createOrder(@RequestBody CreateOrderReq req) {
-        req.setUid(currentApiUid());
-        return Result.getSuccess(tradingEngine.createOrder(req));
-    }
-
-    /**
      * 撤销订单
      *
      * @param req

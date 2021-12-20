@@ -241,4 +241,6 @@ CREATE TABLE user_secret
 )
     COMMENT '用户密钥表';
 
+INSERT INTO user_secret (uid, type, pri_key, pub_key, remark)
+VALUES ('00000000', 'API', '3b434d971d89b3459487d264e68c5a54b938c7491d08ab14e6999b7d0456484a', '8e17a8b38c3b2126a2bb52c5d17769b3bec1188be55907271146957e8010b235', '测试');
 

@@ -20,8 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -40,6 +44,18 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
 
     @Autowired
     private IUserAccountService userAccountService;
+
+    private Map<String, BigDecimal> priceMap;
+
+    @PostConstruct
+    public void init() {
+        List<SymbolConfig> symbolConfigs = symbolConfigService.getAllSymbolConfigs();
+        priceMap = new HashMap<>(symbolConfigs.size());
+        for (SymbolConfig symbolConfig : symbolConfigs) {
+            BigDecimal price = baseMapper.selectPrice(symbolConfig.getSymbol());
+            priceMap.put(symbolConfig.getSymbol(), price == null ? BigDecimal.ZERO : price);
+        }
+    }
 
     @Override
     public boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity) {
@@ -116,6 +132,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
 
         // 给taker加钱
         userAccountService.addAmount(String.valueOf(trade.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerAddCurrency, takerAddAmount, isBuy ? takerFee : BigDecimal.ZERO, TradeStatus.TAKER_ADD);
+
+        // 更新最新价
+        priceMap.put(takerOrder.getSymbol(), takerOrder.getPrice());
         return true;
     }
 
@@ -125,5 +144,10 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         trade.setId(id);
         trade.setStatus(status.name());
         baseMapper.updateById(trade);
+    }
+
+    @Override
+    public BigDecimal getPrice(String symbol) {
+        return priceMap.get(symbol);
     }
 }
