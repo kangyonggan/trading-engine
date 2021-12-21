@@ -17,9 +17,18 @@
         <result column="update_time" property="updateTime" />
     </resultMap>
 
-    <select id="selectPrice" resultType="java.math.BigDecimal">
-        SELECT price FROM trade WHERE symbol = #{symbol} AND status = 'TAKER_ADD'
-        ORDER BY id DESC limit 1
+    <select id="selectLast30Trade" resultType="com.kangyonggan.tradingEngine.dto.res.TradeRes">
+        SELECT
+            a.symbol,
+            a.price,
+            a.quantity,
+            b.side AS makerSide,
+            a.create_time AS createTime
+        FROM trade a, `order` b
+        WHERE
+          a.maker_order_id = b.id
+          AND a.symbol = #{symbol} AND a.status = 'TAKER_ADD'
+        ORDER BY a.id DESC limit 30
     </select>
 
 </mapper>

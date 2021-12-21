@@ -1,9 +1,10 @@
 package com.kangyonggan.tradingEngine.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
+import com.kangyonggan.tradingEngine.dto.res.TradeRes;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.Trade;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,14 +38,6 @@ public interface ITradeService extends IService<Trade> {
     void updateTradeStatus(long id, TradeStatus status);
 
     /**
-     * 获取交易对的最新价
-     *
-     * @param symbol
-     * @return
-     */
-    BigDecimal getPrice(String symbol);
-
-    /**
      * 获取 beginTime 之后的所有交易
      *
      * @param symbol
@@ -52,4 +45,12 @@ public interface ITradeService extends IService<Trade> {
      * @return
      */
     List<Trade> getTradeAfterTime(String symbol, long beginTime);
+
+    /**
+     * 获取最近30条成交记录
+     *
+     * @param symbol
+     * @return
+     */
+    List<TradeRes> getLast30Trade(String symbol);
 }

@@ -1,12 +1,12 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.kangyonggan.tradingEngine.components.BizException;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.AccountType;
-import com.kangyonggan.tradingEngine.constants.enums.ErrorCode;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.TradeStatus;
+import com.kangyonggan.tradingEngine.dto.res.TradeRes;
 import com.kangyonggan.tradingEngine.entity.Order;
 import com.kangyonggan.tradingEngine.entity.SymbolConfig;
 import com.kangyonggan.tradingEngine.entity.Trade;
@@ -14,19 +14,13 @@ import com.kangyonggan.tradingEngine.entity.UserAccount;
 import com.kangyonggan.tradingEngine.mapper.TradeMapper;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
 import com.kangyonggan.tradingEngine.service.ITradeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kangyonggan.tradingEngine.service.IUserAccountService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -45,18 +39,6 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
 
     @Autowired
     private IUserAccountService userAccountService;
-
-    private Map<String, BigDecimal> priceMap;
-
-    @PostConstruct
-    public void init() {
-        List<SymbolConfig> symbolConfigs = symbolConfigService.getAllSymbolConfigs();
-        priceMap = new HashMap<>(symbolConfigs.size());
-        for (SymbolConfig symbolConfig : symbolConfigs) {
-            BigDecimal price = baseMapper.selectPrice(symbolConfig.getSymbol());
-            priceMap.put(symbolConfig.getSymbol(), price == null ? BigDecimal.ZERO : price);
-        }
-    }
 
     @Override
     public boolean saveTrade(Order takerOrder, Order makerOrder, BigDecimal quantity) {
@@ -133,9 +115,6 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
 
         // 给taker加钱
         userAccountService.addAmount(String.valueOf(trade.getId()), takerOrder.getUid(), AccountType.SPOT.name(), takerAddCurrency, takerAddAmount, isBuy ? takerFee : BigDecimal.ZERO, TradeStatus.TAKER_ADD);
-
-        // 更新最新价
-        priceMap.put(takerOrder.getSymbol(), takerOrder.getPrice());
         return true;
     }
 
@@ -148,15 +127,15 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     }
 
     @Override
-    public BigDecimal getPrice(String symbol) {
-        return priceMap.get(symbol);
-    }
-
-    @Override
     public List<Trade> getTradeAfterTime(String symbol, long beginTime) {
         QueryWrapper<Trade> qw = new QueryWrapper<>();
         qw.eq("symbol", symbol).gt("create_time", beginTime).eq("status", TradeStatus.TAKER_ADD.name());
         qw.orderByAsc("id");
         return baseMapper.selectList(qw);
+    }
+
+    @Override
+    public List<TradeRes> getLast30Trade(String symbol) {
+        return baseMapper.selectLast30Trade(symbol);
     }
 }

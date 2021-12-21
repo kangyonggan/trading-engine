@@ -24,12 +24,12 @@ public class SessionInfo implements Serializable {
 
     private Long expireTime = System.currentTimeMillis() + 180000;
 
-    public void addTopics(List<String> topics) {
-        this.topics.addAll(topics);
+    public void addTopic(String topic) {
+        this.topics.add(topic);
     }
 
-    public void removeTopics(List<String> topics) {
-        this.topics.removeAll(topics);
+    public void removeTopic(String topic) {
+        this.topics.remove(topic);
     }
 
     public boolean containsTopic(String topic) {

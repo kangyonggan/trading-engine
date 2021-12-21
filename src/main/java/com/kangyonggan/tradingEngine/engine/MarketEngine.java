@@ -40,7 +40,7 @@ public class MarketEngine {
             TickDto lastTick = redisManager.getLastKline(symbolConfig.getSymbol());
             long beginTime = 0L;
             if (lastTick != null) {
-                beginTime = lastTick.getId() * 1000L;
+                beginTime = lastTick.getId() * 60000L;
             } else {
                 lastTick = new TickDto();
                 lastTick.setHigh(BigDecimal.ZERO);
@@ -66,7 +66,7 @@ public class MarketEngine {
 
             for (long id = beginTime; id <= endTime; id++) {
                 TickDto tickDto = new TickDto();
-                tickDto.setId(id * 60);
+                tickDto.setId(id);
                 tickDto.setTs(id * 60000);
                 tickDto.setSymbol(symbolConfig.getSymbol());
                 if (dbTicks.containsKey(id)) {
@@ -94,12 +94,12 @@ public class MarketEngine {
     private Map<Long, TickDto> toTick(List<Trade> trades, TickDto lastTick) {
         Map<Long, TickDto> dbTicks = new HashMap<>();
         for (Trade trade : trades) {
-            TickDto dbTick = dbTicks.get(trade.getCreateTime().toEpochSecond(ZoneOffset.of("+8")));
+            TickDto dbTick = dbTicks.get(trade.getCreateTime().toEpochSecond(ZoneOffset.of("+8")) / 60);
             if (dbTick == null) {
                 dbTick = new TickDto();
                 dbTick.setSymbol(trade.getSymbol());
                 dbTick.setTs(trade.getCreateTime().toEpochSecond(ZoneOffset.of("+8")) * 1000);
-                dbTick.setId(dbTick.getTs() / 1000);
+                dbTick.setId(dbTick.getTs() / 60000);
                 dbTick.setHigh(lastTick.getClose());
                 dbTick.setOpen(lastTick.getClose());
                 dbTick.setLow(lastTick.getClose());
@@ -109,14 +109,14 @@ public class MarketEngine {
             TickDto tickDto = new TickDto();
             tickDto.setSymbol(trade.getSymbol());
             tickDto.setTs(trade.getCreateTime().toEpochSecond(ZoneOffset.of("+8")) * 1000);
-            tickDto.setId(dbTick.getTs() / 1000);
+            tickDto.setId(dbTick.getTs() / 60000);
             tickDto.setHigh(trade.getPrice().compareTo(dbTick.getHigh()) > 0 ? trade.getPrice() : dbTick.getHigh());
             tickDto.setOpen(lastTick.getClose());
             tickDto.setLow(trade.getPrice().compareTo(dbTick.getLow()) < 0 ? trade.getPrice() : dbTick.getLow());
             tickDto.setClose(trade.getPrice());
             tickDto.setVol(dbTick.getVol().add(trade.getQuantity()));
 
-            dbTicks.put(tickDto.getId() / 60, tickDto);
+            dbTicks.put(tickDto.getId(), tickDto);
             lastTick = tickDto;
         }
         return dbTicks;

@@ -1,12 +1,16 @@
 package com.kangyonggan.tradingEngine.websocket;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kangyonggan.tradingEngine.components.RedisManager;
+import com.kangyonggan.tradingEngine.service.ITradeService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +26,27 @@ public class MarketWebsocket {
      * 存放所有的客户端
      */
     private static final Map<String, SessionInfo> CLIENTS = new ConcurrentHashMap<>();
+
+    private static final Map<String, Long> INTERVAL_LEN = new HashMap<>();
+
+    static {
+        INTERVAL_LEN.put("1min", 1440L);
+        INTERVAL_LEN.put("5min", 500L);
+        INTERVAL_LEN.put("15min", 500L);
+        INTERVAL_LEN.put("30min", 200L);
+        INTERVAL_LEN.put("60min", 240L);
+        INTERVAL_LEN.put("4hour", 200L);
+        INTERVAL_LEN.put("1day", 200L);
+        INTERVAL_LEN.put("1week", 200L);
+        INTERVAL_LEN.put("1month", 200L);
+        INTERVAL_LEN.put("1year", 200L);
+    }
+
+    @Autowired
+    private ITradeService tradeService;
+
+    @Autowired
+    private RedisManager redisManager;
 
     @PostConstruct
     public void init() {
@@ -96,13 +121,27 @@ public class MarketWebsocket {
         log.info("websocket收到客户端发来的消息: {}", message);
         WebSocketReq req = JSONObject.parseObject(message, WebSocketReq.class);
         if (req.getMethod().equals(WebSocketMethod.SUB.name())) {
-            CLIENTS.get(session.getId()).addTopics(req.getParams());
+            CLIENTS.get(session.getId()).addTopic(req.getParams());
         } else if (req.getMethod().equals(WebSocketMethod.UNSUB.name())) {
-            CLIENTS.get(session.getId()).removeTopics(req.getParams());
-        } else if (req.getMethod().equals(WebSocketMethod.REQ.name())) {
-            // TODO 返回请求数据
+            CLIENTS.get(session.getId()).removeTopic(req.getParams());
         } else if (req.getMethod().equals(WebSocketMethod.PONG.name())) {
             CLIENTS.get(session.getId()).updateExpireTime();
+        } else if (req.getMethod().equals(WebSocketMethod.REQ.name())) {
+            if (req.getParams().startsWith("KLINE@")) {
+                // 请求历史K线，KLINE@BTCUSDT_1min
+                JSONObject msg = new JSONObject();
+                msg.put("channel", req.getParams());
+                Long size = INTERVAL_LEN.getOrDefault(req.getInterval(), 300L);
+                long max = System.currentTimeMillis() / 60000;
+                msg.put("result", redisManager.getKline(req.getSymbol(), max - size, max));
+                session.getAsyncRemote().sendText(msg.toJSONString());
+            } else if (req.getParams().startsWith("TRADE@")) {
+                // 请求最新成交，TRADE@BTCUSDT
+                JSONObject msg = new JSONObject();
+                msg.put("channel", req.getParams());
+                msg.put("result", tradeService.getLast30Trade(req.getSymbol()));
+                session.getAsyncRemote().sendText(msg.toJSONString());
+            }
         }
     }
 

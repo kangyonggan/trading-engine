@@ -12,6 +12,17 @@ import java.util.List;
 public class WebSocketReq implements Serializable {
 
     private String method;
-    private List<String> params;
+    private String params;
+
+    public String getInterval() {
+        return params.substring(params.indexOf("_") + 1);
+    }
+
+    public String getSymbol() {
+        if (params.contains("_")) {
+            return params.substring(params.indexOf("@") + 1, params.lastIndexOf("_"));
+        }
+        return params.substring(params.indexOf("@") + 1);
+    }
 
 }

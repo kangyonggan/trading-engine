@@ -182,6 +182,19 @@ public class RedisManager {
     }
 
     /**
+     * 获取指定的K线
+     *
+     * @param symbol
+     * @param min
+     * @param max
+     * @return
+     */
+    public TickDto getKline(String symbol, Long min, Long max) {
+        Set<Object> tickDtos = redisTemplate.opsForZSet().rangeByScore("KLINE_" + symbol, min, max);
+        return tickDtos == null || tickDtos.isEmpty() ? null : (TickDto) tickDtos.toArray()[0];
+    }
+
+    /**
      * 添加K线
      *
      * @param tickDto

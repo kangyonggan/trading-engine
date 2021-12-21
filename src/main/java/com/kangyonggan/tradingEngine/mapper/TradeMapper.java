@@ -1,10 +1,11 @@
 package com.kangyonggan.tradingEngine.mapper;
 
-import com.kangyonggan.tradingEngine.entity.Trade;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.kangyonggan.tradingEngine.dto.res.TradeRes;
+import com.kangyonggan.tradingEngine.entity.Trade;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -17,10 +18,10 @@ import java.math.BigDecimal;
 public interface TradeMapper extends BaseMapper<Trade> {
 
     /**
-     * 查询交易对的最新价
+     * 获取最近30条成交记录
      *
      * @param symbol
      * @return
      */
-    BigDecimal selectPrice(@Param("symbol") String symbol);
+    List<TradeRes> selectLast30Trade(@Param("symbol") String symbol);
 }
