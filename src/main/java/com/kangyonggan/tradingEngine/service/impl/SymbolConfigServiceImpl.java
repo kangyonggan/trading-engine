@@ -77,11 +77,11 @@ public class SymbolConfigServiceImpl extends ServiceImpl<SymbolConfigMapper, Sym
             symbolRes.setQuantityScale(symbolConfig.getQuantityScale());
             TickDto lastKline = redisManager.getLastKline(symbolConfig.getSymbol());
             symbolRes.setPrice(lastKline == null ? BigDecimal.ZERO : lastKline.getClose());
-            Long min = System.currentTimeMillis() / 1000 - 24 * 60 * 60;
+            Long min = System.currentTimeMillis() / 60000 - 24 * 60;
             Long max = min;
             TickDto oneDayAgoTick = redisManager.getKline(symbolConfig.getSymbol(), min, max);
             if (oneDayAgoTick == null) {
-                max = System.currentTimeMillis() / 1000;
+                max = System.currentTimeMillis() / 60000;
                 oneDayAgoTick = redisManager.getKline(symbolConfig.getSymbol(), min, max);
             }
             BigDecimal rose = BigDecimal.ZERO;

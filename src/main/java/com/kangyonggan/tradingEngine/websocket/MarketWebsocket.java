@@ -2,6 +2,11 @@ package com.kangyonggan.tradingEngine.websocket;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kangyonggan.tradingEngine.components.RedisManager;
+import com.kangyonggan.tradingEngine.dto.TickDto;
+import com.kangyonggan.tradingEngine.dto.res.SymbolRes;
+import com.kangyonggan.tradingEngine.engine.MarketEngine;
+import com.kangyonggan.tradingEngine.entity.SymbolConfig;
+import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
 import com.kangyonggan.tradingEngine.service.ITradeService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,9 +54,13 @@ public class MarketWebsocket {
     @Autowired
     private RedisManager redisManager;
 
+    @Autowired
+    private MarketEngine marketEngine;
+
     @PostConstruct
     public void init() {
         sendHeartBeat();
+        sendMarket();
     }
 
     /**
@@ -72,7 +82,6 @@ public class MarketWebsocket {
             while (true) {
                 try {
                     Thread.sleep(15000);
-                    log.info("在线人数：{}", CLIENTS.size());
                     for (SessionInfo sessionInfo : CLIENTS.values()) {
                         if (sessionInfo.getExpireTime() < System.currentTimeMillis()) {
                             sessionInfo.getSession().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "服务器长时间未收到心跳回复"));
@@ -84,6 +93,38 @@ public class MarketWebsocket {
                     }
                 } catch (Exception e) {
                     log.error("心跳线程异常", e);
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 发送行情
+     */
+    private void sendMarket() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Map<String, TickDto> tickDtoMap = new HashMap<>();
+                    for (SessionInfo sessionInfo : CLIENTS.values()) {
+                        TickDto tickDto = tickDtoMap.get(sessionInfo.getSymbol() + sessionInfo.getInterval());
+                        if (tickDto == null) {
+                            tickDto = marketEngine.getKline(sessionInfo.getSymbol(), sessionInfo.getInterval());
+                            tickDtoMap.put(sessionInfo.getSymbol() + sessionInfo.getInterval(), tickDto);
+                        }
+                        JSONObject params = new JSONObject();
+                        params.put("channel", "kline@" + sessionInfo.getSymbol() + "_" + sessionInfo.getInterval());
+                        params.put("result", tickDto);
+                        sessionInfo.getSession().getAsyncRemote().sendText(params.toJSONString());
+                    }
+                } catch (Exception e) {
+                    log.error("心跳线程异常", e);
+                } finally {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        log.error("心跳线程异常", e);
+                    }
                 }
             }
         }).start();
@@ -121,9 +162,9 @@ public class MarketWebsocket {
         log.info("websocket收到客户端发来的消息: {}", message);
         WebSocketReq req = JSONObject.parseObject(message, WebSocketReq.class);
         if (req.getMethod().equals(WebSocketMethod.SUB.name())) {
-            CLIENTS.get(session.getId()).addTopic(req.getParams());
-        } else if (req.getMethod().equals(WebSocketMethod.UNSUB.name())) {
-            CLIENTS.get(session.getId()).removeTopic(req.getParams());
+            // all@BTCUSDT_1min
+            CLIENTS.get(session.getId()).setSymbol(req.getSymbol());
+            CLIENTS.get(session.getId()).setInterval(req.getInterval());
         } else if (req.getMethod().equals(WebSocketMethod.PONG.name())) {
             CLIENTS.get(session.getId()).updateExpireTime();
         } else if (req.getMethod().equals(WebSocketMethod.REQ.name())) {
@@ -136,25 +177,11 @@ public class MarketWebsocket {
                 msg.put("result", redisManager.getKline(req.getSymbol(), max - size, max));
                 session.getAsyncRemote().sendText(msg.toJSONString());
             } else if (req.getParams().startsWith("TRADE@")) {
-                // 请求最新成交，TRADE@BTCUSDT
+                // 请求30条最新成交，TRADE@BTCUSDT
                 JSONObject msg = new JSONObject();
                 msg.put("channel", req.getParams());
                 msg.put("result", tradeService.getLast30Trade(req.getSymbol()));
                 session.getAsyncRemote().sendText(msg.toJSONString());
-            }
-        }
-    }
-
-    /**
-     * 发送消息
-     *
-     * @param topic 话题
-     * @param msg   消息内容
-     */
-    public void sendMsg(String topic, String msg) {
-        for (Map.Entry<String, SessionInfo> sessionEntry : CLIENTS.entrySet()) {
-            if (sessionEntry.getValue().containsTopic(topic)) {
-                sessionEntry.getValue().getSession().getAsyncRemote().sendText(msg);
             }
         }
     }

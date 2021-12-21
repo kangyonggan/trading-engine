@@ -122,4 +122,15 @@ public class MarketEngine {
         return dbTicks;
     }
 
+    /**
+     * 获取最新K线
+     *
+     * @param symbol
+     * @param interval
+     * @return
+     */
+    public TickDto getKline(String symbol, String interval) {
+        // TODO
+        return new TickDto();
+    }
 }
