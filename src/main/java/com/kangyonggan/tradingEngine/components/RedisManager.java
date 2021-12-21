@@ -1,6 +1,7 @@
 package com.kangyonggan.tradingEngine.components;
 
 import com.kangyonggan.tradingEngine.constants.RedisKeys;
+import com.kangyonggan.tradingEngine.dto.TickDto;
 import com.kangyonggan.tradingEngine.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,6 +169,27 @@ public class RedisManager {
      */
     public long increment(String key) {
         return redisTemplate.opsForValue().increment(key, 1);
+    }
+
+    /**
+     * 获取最新的一条K线
+     *
+     * @param symbol
+     * @return
+     */
+    public TickDto getLastKline(String symbol) {
+        return (TickDto) redisTemplate.opsForValue().get("LAST_KLINE:" + symbol);
+    }
+
+    /**
+     * 添加K线
+     *
+     * @param tickDto
+     */
+    public void addKline(TickDto tickDto) {
+        redisTemplate.opsForZSet().removeRangeByScore("KLINE_" + tickDto.getSymbol(), tickDto.getId(), tickDto.getId());
+        redisTemplate.opsForZSet().add("KLINE_" + tickDto.getSymbol(), tickDto, tickDto.getId());
+        redisTemplate.opsForValue().set("LAST_KLINE:" + tickDto.getSymbol(), tickDto);
     }
 
     /**

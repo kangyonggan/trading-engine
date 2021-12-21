@@ -1,5 +1,6 @@
 package com.kangyonggan.tradingEngine.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.kangyonggan.tradingEngine.components.BizException;
 import com.kangyonggan.tradingEngine.constants.AppConstants;
 import com.kangyonggan.tradingEngine.constants.enums.AccountType;
@@ -149,5 +150,13 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Override
     public BigDecimal getPrice(String symbol) {
         return priceMap.get(symbol);
+    }
+
+    @Override
+    public List<Trade> getTradeAfterTime(String symbol, long beginTime) {
+        QueryWrapper<Trade> qw = new QueryWrapper<>();
+        qw.eq("symbol", symbol).gt("create_time", beginTime).eq("status", TradeStatus.TAKER_ADD.name());
+        qw.orderByAsc("id");
+        return baseMapper.selectList(qw);
     }
 }

@@ -6,6 +6,7 @@ import com.kangyonggan.tradingEngine.entity.Trade;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -42,4 +43,13 @@ public interface ITradeService extends IService<Trade> {
      * @return
      */
     BigDecimal getPrice(String symbol);
+
+    /**
+     * 获取 beginTime 之后的所有交易
+     *
+     * @param symbol
+     * @param beginTime
+     * @return
+     */
+    List<Trade> getTradeAfterTime(String symbol, long beginTime);
 }
