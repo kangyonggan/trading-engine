@@ -3,8 +3,7 @@ package com.kangyonggan.tradingEngine.controller;
 import com.kangyonggan.tradingEngine.annotation.AnonymousAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiAccess;
 import com.kangyonggan.tradingEngine.annotation.ApiVersion;
-import com.kangyonggan.tradingEngine.dto.req.CreateOrderReq;
-import com.kangyonggan.tradingEngine.dto.req.GetOrderReq;
+import com.kangyonggan.tradingEngine.dto.req.*;
 import com.kangyonggan.tradingEngine.dto.res.*;
 import com.kangyonggan.tradingEngine.engine.TradingEngine;
 import com.kangyonggan.tradingEngine.service.ISymbolConfigService;
@@ -99,5 +98,44 @@ public class ApiController extends BaseController {
     public Result<OrderRes> getOrder(GetOrderReq req) {
         req.setUid(currentApiUid());
         return Result.getSuccess(tradingEngine.getOrder(req));
+    }
+
+    /**
+     * 撤销订单
+     *
+     * @param req
+     * @return
+     */
+    @DeleteMapping
+    @ApiAccess
+    public Result<CancelOrderRes> cancelOrder(@RequestBody CancelOrderReq req) {
+        req.setUid(currentApiUid());
+        return Result.getSuccess(tradingEngine.cancelOrder(req));
+    }
+
+    /**
+     * 当前挂单
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("openOrders")
+    @ApiAccess
+    public Result<List<OrderRes>> openOrders(OpenOrderReq req) {
+        req.setUid(currentApiUid());
+        return Result.getSuccess(tradingEngine.openOrders(req));
+    }
+
+    /**
+     * 查询所有订单
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("allOrders")
+    @ApiAccess
+    public Result<List<OrderRes>> allOrders(AllOrderReq req) {
+        req.setUid(currentApiUid());
+        return Result.getSuccess(tradingEngine.allOrders(req));
     }
 }

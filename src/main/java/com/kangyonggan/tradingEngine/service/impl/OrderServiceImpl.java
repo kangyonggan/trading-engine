@@ -2,6 +2,7 @@ package com.kangyonggan.tradingEngine.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kangyonggan.tradingEngine.annotation.Valid;
 import com.kangyonggan.tradingEngine.constants.enums.OrderSide;
 import com.kangyonggan.tradingEngine.constants.enums.OrderStatus;
 import com.kangyonggan.tradingEngine.constants.enums.OrderType;
@@ -89,6 +90,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Valid
     public List<Order> getOpenOrders(OpenOrderReq req) {
         QueryWrapper<Order> qw = new QueryWrapper<>();
         qw.eq("uid", req.getUid());
@@ -100,6 +102,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Valid
     public List<Order> getAllOrders(AllOrderReq req) {
         QueryWrapper<Order> qw = new QueryWrapper<>();
         qw.eq("uid", req.getUid());
